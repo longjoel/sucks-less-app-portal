@@ -37,7 +37,7 @@ export const SlapTextInput = ({
   label: string;
   value: string;
   onChange: (value: string) => void;
-  type?: "text" | "number";
+  type?: "text" | "number" | "password";
 }) => (
   <label className="slap-input-wrap">
     <span>{label}</span>

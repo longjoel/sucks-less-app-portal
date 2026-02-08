@@ -15,16 +15,17 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: radial-gradient(circle at top left, #e4dacb, transparent 55%), var(--bg);
   color: var(--ink);
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
 }
 
 .page {
-  width: min(860px, 100%);
+  width: 100%;
+  max-width: 360px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0.75rem;
 }
 
 .header h1 {
@@ -36,10 +37,29 @@ body {
   color: var(--muted);
 }
 
+.section-title {
+  margin: 1rem 0 0.6rem;
+  font-size: 1rem;
+}
+
+.status-panel {
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--panel);
+  padding: 0.7rem;
+  margin-bottom: 0.8rem;
+}
+
+.status-line {
+  margin: 0.2rem 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
 .app-grid {
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.6rem;
+  grid-template-columns: 1fr;
 }
 
 .app-card {
@@ -51,6 +71,7 @@ body {
   padding: 0.9rem;
   display: grid;
   gap: 0.6rem;
+  min-height: 44px;
 }
 
 .app-card:hover {
@@ -83,8 +104,13 @@ body {
   border: 0;
   color: var(--accent-contrast);
   border-radius: 0.6rem;
-  padding: 0.5rem 0.9rem;
+  padding: 0.65rem 0.9rem;
   font-weight: 600;
+  min-height: 44px;
+}
+
+.slap-button:disabled {
+  opacity: 0.55;
 }
 
 .app-panel {
@@ -113,8 +139,9 @@ body {
 .slap-input {
   border: 1px solid var(--border);
   border-radius: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.65rem;
   font: inherit;
+  min-height: 44px;
 }
 
 .slap-button-row {
@@ -126,4 +153,16 @@ body {
 .slap-inline-text {
   color: var(--muted);
   margin: 0;
+}
+
+@media (min-width: 700px) {
+  .page {
+    max-width: 860px;
+    padding: 1rem;
+  }
+
+  .app-grid {
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
 }

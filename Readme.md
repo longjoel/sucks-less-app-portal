@@ -73,5 +73,6 @@ MVP scaffold complete:
 - Launcher shell
 - Shared SDK and UI packages
 - Calculator sample app
+- Journal app (optional encryption + import/export)
 - PWA config
 - Docs-targeted build for GitHub Pages
