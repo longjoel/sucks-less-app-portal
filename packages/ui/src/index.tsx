@@ -1,11 +1,9 @@
 import type { PropsWithChildren } from "react";
 
 export const SlapApplicationShell = ({
-  title,
   children
-}: PropsWithChildren<{ title: string }>) => (
+}: PropsWithChildren<{ title?: string }>) => (
   <section className="slap-shell">
-    <h2>{title}</h2>
     {children}
   </section>
 );

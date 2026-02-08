@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import type { SlapApplicationContext, SlapApplicationManifest } from "@slap/sdk";
-import { SlapActionButton, SlapApplicationShell, SlapApplicationTitle, SlapInlineText } from "@slap/ui";
+import { SlapActionButton, SlapInlineText } from "@slap/ui";
 
 type Obstacle = {
   id: number;
@@ -213,9 +213,8 @@ const SkiFreeApp = ({ ctx }: { ctx: SlapApplicationContext }) => {
   }, [state.obstacles, state.skierLane]);
 
   return (
-    <SlapApplicationShell title="Ski Free">
+    <section className="slap-shell">
       <div className="skifree-layout">
-        <SlapApplicationTitle title="Ski Free" />
         <SlapInlineText>Use Left and Right to dodge trees.</SlapInlineText>
 
         <div className="skifree-stage">
@@ -239,7 +238,7 @@ const SkiFreeApp = ({ ctx }: { ctx: SlapApplicationContext }) => {
       <div className="skifree-controls">
         <SlapActionButton title={state.status === "playing" ? "Restart" : "Start"} onClick={startOrRestart} />
       </div>
-    </SlapApplicationShell>
+    </section>
   );
 };
 

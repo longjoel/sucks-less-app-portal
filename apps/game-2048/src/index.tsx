@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type TouchEvent } from "react";
 import type { SlapApplicationContext, SlapApplicationManifest } from "@slap/sdk";
-import { SlapActionButton, SlapApplicationShell, SlapApplicationTitle, SlapInlineText } from "@slap/ui";
+import { SlapActionButton, SlapApplicationShell, SlapInlineText } from "@slap/ui";
 
 type Direction = "left" | "right" | "up" | "down";
 type Board = number[][];
@@ -245,7 +245,6 @@ const Game2048App = ({ ctx }: { ctx: SlapApplicationContext }) => {
 
   return (
     <SlapApplicationShell title="2048">
-      <SlapApplicationTitle title="2048" />
       <SlapInlineText>Swipe tiles to combine matching numbers.</SlapInlineText>
       <SlapInlineText>Score: {state.score} | Best: {state.bestScore}</SlapInlineText>
       <SlapInlineText>{status}</SlapInlineText>

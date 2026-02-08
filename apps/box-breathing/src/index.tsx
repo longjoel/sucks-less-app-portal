@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SlapApplicationContext, SlapApplicationManifest } from "@slap/sdk";
-import { SlapActionButton, SlapApplicationShell, SlapApplicationTitle, SlapInlineText } from "@slap/ui";
+import { SlapActionButton, SlapApplicationShell, SlapInlineText } from "@slap/ui";
 
 type Phase = "Inhale" | "Hold" | "Exhale" | "Hold";
 
@@ -197,7 +197,6 @@ const BoxBreathingApp = ({ ctx }: { ctx: SlapApplicationContext }) => {
 
   return (
     <SlapApplicationShell title="Box Breathing">
-      <SlapApplicationTitle title="Guided Box Breathing" />
       <SlapInlineText>Cycle: Inhale, Hold, Exhale, Hold</SlapInlineText>
 
       <label className="slap-input-wrap">

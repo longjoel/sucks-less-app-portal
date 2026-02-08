@@ -296,8 +296,6 @@ const DailyChecklistApp = ({ ctx }: { ctx: SlapApplicationContext }) => {
 
   return (
     <SlapApplicationShell title="Daily Checklist">
-      <SlapApplicationTitle title="Daily Checklist" />
-
       <div className="slap-button-row">
         <SlapActionButton title="Prev Day" onClick={() => setSelectedDateKey((current) => shiftDateKey(current, -1))} />
         <SlapActionButton title="Today" onClick={() => setSelectedDateKey(todayKey())} />

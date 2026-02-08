@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SlapApplicationContext, SlapApplicationManifest } from "@slap/sdk";
-import { SlapActionButton, SlapApplicationShell, SlapApplicationTitle, SlapInlineText } from "@slap/ui";
+import { SlapActionButton, SlapApplicationShell, SlapInlineText } from "@slap/ui";
 
 type Cell = {
   hasMine: boolean;
@@ -293,7 +293,6 @@ const MinesweeperApp = ({ ctx }: { ctx: SlapApplicationContext }) => {
 
   return (
     <SlapApplicationShell title="Minesweeper">
-      <SlapApplicationTitle title="Minesweeper" />
       <SlapInlineText>{statusText}</SlapInlineText>
       <SlapInlineText>
         Mode: {state.mode === "reveal" ? "Reveal" : "Flag"} | Mines left: {mineCounter} | Time: {state.elapsedSeconds}s
