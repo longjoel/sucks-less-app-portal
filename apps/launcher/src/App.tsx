@@ -35,6 +35,11 @@ type InstallDebug = {
   manifestLinkPresent: boolean;
 };
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
 const INSTALLED_APPS_KEY = "slap:launcher:installed-apps";
 const HIDDEN_APPS_KEY = "slap:launcher:hidden-apps";
 
@@ -286,6 +291,7 @@ export const App = () => {
     quotaBytes: null
   });
   const [installDebug, setInstallDebug] = useState<InstallDebug>(getInstallDebugSnapshot);
+  const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
 
   const installedAppList = useMemo(
     () =>
@@ -335,10 +341,7 @@ export const App = () => {
 
   const refreshInstallDebug = () => {
     const snapshot = getInstallDebugSnapshot();
-    setInstallDebug((current) => ({
-      ...snapshot,
-      hasBeforeInstallPrompt: current.hasBeforeInstallPrompt
-    }));
+    setInstallDebug({ ...snapshot, hasBeforeInstallPrompt: installPromptEvent !== null });
   };
 
   const syncInstalledApps = async () => {
@@ -404,6 +407,10 @@ export const App = () => {
   }, []);
 
   useEffect(() => {
+    refreshInstallDebug();
+  }, [installPromptEvent]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
 
     const mediaQuery = window.matchMedia("(display-mode: standalone)");
@@ -412,12 +419,20 @@ export const App = () => {
       refreshInstallDebug();
     };
 
-    const beforeInstallPromptHandler = () => {
-      setInstallDebug((current) => ({ ...current, hasBeforeInstallPrompt: true }));
+    const beforeInstallPromptHandler = (event: Event) => {
+      event.preventDefault();
+      setInstallPromptEvent(event as BeforeInstallPromptEvent);
+    };
+
+    const appInstalledHandler = () => {
+      setInstallPromptEvent(null);
+      setUpdateMessage("App installed to device.");
+      refreshInstallDebug();
     };
 
     updateMode();
     window.addEventListener("beforeinstallprompt", beforeInstallPromptHandler);
+    window.addEventListener("appinstalled", appInstalledHandler);
 
     if (typeof mediaQuery.addEventListener === "function") {
       mediaQuery.addEventListener("change", updateMode);
@@ -427,6 +442,7 @@ export const App = () => {
 
     return () => {
       window.removeEventListener("beforeinstallprompt", beforeInstallPromptHandler);
+      window.removeEventListener("appinstalled", appInstalledHandler);
       if (typeof mediaQuery.addEventListener === "function") {
         mediaQuery.removeEventListener("change", updateMode);
       } else {
@@ -434,6 +450,24 @@ export const App = () => {
       }
     };
   }, []);
+
+  const promptInstall = async () => {
+    if (!installPromptEvent) return;
+
+    setLauncherError(null);
+
+    try {
+      await installPromptEvent.prompt();
+      const choice = await installPromptEvent.userChoice;
+      setUpdateMessage(
+        choice.outcome === "accepted" ? "Install prompt accepted." : "Install prompt dismissed."
+      );
+    } catch (error) {
+      setLauncherError(error instanceof Error ? error.message : "Unable to show install prompt.");
+    } finally {
+      setInstallPromptEvent(null);
+    }
+  };
 
   const installApp = async (app: AppCatalogItem) => {
     setLauncherError(null);
@@ -669,6 +703,9 @@ export const App = () => {
       </section>
 
       <div className="slap-button-row">
+        {!isStandalone && installPromptEvent ? (
+          <SlapButton title="Install App" onClick={() => void promptInstall()} buttonClassName="install-button" />
+        ) : null}
         <SlapButton title="Manage Apps" onClick={() => setScreen("manage")} />
         <SlapButton
           title={isSyncingApps ? "Checking..." : "Check Updates"}
@@ -683,13 +720,15 @@ export const App = () => {
 const SlapButton = ({
   title,
   onClick,
-  disabled
+  disabled,
+  buttonClassName
 }: {
   title: string;
   onClick: () => void;
   disabled?: boolean;
+  buttonClassName?: string;
 }) => (
-  <button type="button" className="slap-button" onClick={onClick} disabled={disabled}>
+  <button type="button" className={`slap-button${buttonClassName ? ` ${buttonClassName}` : ""}`} onClick={onClick} disabled={disabled}>
     {title}
   </button>
 );

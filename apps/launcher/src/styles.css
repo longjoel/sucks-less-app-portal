@@ -144,6 +144,10 @@ body {
   opacity: 0.55;
 }
 
+.install-button {
+  background: #3f6d3f;
+}
+
 .app-panel {
   margin-top: 0.7rem;
   background: var(--panel);
