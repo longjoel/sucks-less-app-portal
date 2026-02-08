@@ -10,7 +10,9 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@slap/box-breathing": "0.1.0",
     "@slap/calculator": "0.1.0",
+    "@slap/daily-checklist": "0.1.0",
     "@slap/journal": "0.1.0",
     "@slap/mh-checkin": "0.1.0",
     "@slap/sdk": "0.1.0",

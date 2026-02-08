@@ -56,6 +56,24 @@ const appCatalog: AppCatalogItem[] = [
     version: "1.0.0",
     icon: "🧠",
     loadManifest: async () => (await import("@slap/mh-checkin")).mhCheckinManifest
+  },
+  {
+    id: "box-breathing",
+    title: "Box Breathing",
+    author: "Joel",
+    description: "Canvas-guided inhale/hold/exhale/hold breathing.",
+    version: "1.0.0",
+    icon: "🫁",
+    loadManifest: async () => (await import("@slap/box-breathing")).boxBreathingManifest
+  },
+  {
+    id: "daily-checklist",
+    title: "Daily Checklist",
+    author: "Joel",
+    description: "Check off daily tasks and edit your reusable list.",
+    version: "1.0.0",
+    icon: "✅",
+    loadManifest: async () => (await import("@slap/daily-checklist")).dailyChecklistManifest
   }
 ];
 

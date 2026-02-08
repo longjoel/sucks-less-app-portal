@@ -3,14 +3,16 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  base: "./",
+  base: "/sucks-less-app-portal/",
   resolve: {
     alias: {
       "@slap/sdk": new URL("../../packages/sdk/src/index.ts", import.meta.url).pathname,
       "@slap/ui": new URL("../../packages/ui/src/index.tsx", import.meta.url).pathname,
       "@slap/calculator": new URL("../calculator/src/index.tsx", import.meta.url).pathname,
       "@slap/journal": new URL("../journal/src/index.tsx", import.meta.url).pathname,
-      "@slap/mh-checkin": new URL("../mh-checkin/src/index.tsx", import.meta.url).pathname
+      "@slap/mh-checkin": new URL("../mh-checkin/src/index.tsx", import.meta.url).pathname,
+      "@slap/box-breathing": new URL("../box-breathing/src/index.tsx", import.meta.url).pathname,
+      "@slap/daily-checklist": new URL("../daily-checklist/src/index.tsx", import.meta.url).pathname
     }
   },
   plugins: [
@@ -29,13 +31,15 @@ export default defineConfig({
         "screenshot-wide.png"
       ],
       manifest: {
+        id: "/sucks-less-app-portal/",
         name: "Suck Less App Portal",
         short_name: "SLAP",
         description: "Offline-first launcher for small local apps.",
         theme_color: "#2d4030",
         background_color: "#f4f0e8",
         display: "standalone",
-        start_url: ".",
+        start_url: "/sucks-less-app-portal/",
+        scope: "/sucks-less-app-portal/",
         icons: [
           {
             src: "icon-192.png",
