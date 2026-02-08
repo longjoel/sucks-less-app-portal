@@ -1,0 +1,1 @@
+{"name":"Suck Less App Portal","short_name":"SLAP","start_url":".","display":"standalone","background_color":"#f4f0e8","lang":"en","scope":"./","description":"Offline-first launcher for small local apps.","theme_color":"#2d4030","icons":[{"src":"favicon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]}
