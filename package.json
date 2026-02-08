@@ -1,0 +1,15 @@
+{
+  "name": "sucks-less-app-portal",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run -w @slap/launcher dev",
+    "build": "npm run -w @slap/launcher build",
+    "preview": "npm run -w @slap/launcher preview",
+    "typecheck": "npm run -ws typecheck"
+  }
+}
