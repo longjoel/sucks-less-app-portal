@@ -43,10 +43,19 @@ const appCatalog: AppCatalogItem[] = [
     id: "journal",
     title: "Journal",
     author: "Joel",
-    description: "Password-protected journal with import/export.",
+    description: "Mood-aware journal with optional prompts.",
     version: "1.0.0",
     icon: "📓",
     loadManifest: async () => (await import("@slap/journal")).journalManifest
+  },
+  {
+    id: "mh-checkin",
+    title: "MH Checkin",
+    author: "Joel",
+    description: "Take PHQ-9 or GAD-7, track trends, export results.",
+    version: "1.0.0",
+    icon: "🧠",
+    loadManifest: async () => (await import("@slap/mh-checkin")).mhCheckinManifest
   }
 ];
 

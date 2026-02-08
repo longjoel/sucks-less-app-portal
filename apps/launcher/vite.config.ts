@@ -9,7 +9,8 @@ export default defineConfig({
       "@slap/sdk": new URL("../../packages/sdk/src/index.ts", import.meta.url).pathname,
       "@slap/ui": new URL("../../packages/ui/src/index.tsx", import.meta.url).pathname,
       "@slap/calculator": new URL("../calculator/src/index.tsx", import.meta.url).pathname,
-      "@slap/journal": new URL("../journal/src/index.tsx", import.meta.url).pathname
+      "@slap/journal": new URL("../journal/src/index.tsx", import.meta.url).pathname,
+      "@slap/mh-checkin": new URL("../mh-checkin/src/index.tsx", import.meta.url).pathname
     }
   },
   plugins: [
