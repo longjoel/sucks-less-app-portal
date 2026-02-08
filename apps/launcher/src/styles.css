@@ -320,3 +320,43 @@ body {
 .journal-entry-summary strong {
   font-size: 0.98rem;
 }
+
+.game2048-grid {
+  width: 100%;
+  max-width: 320px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.3rem;
+  background: #c5b9a5;
+  border-radius: 0.7rem;
+  padding: 0.3rem;
+}
+
+.game2048-tile {
+  aspect-ratio: 1 / 1;
+  border-radius: 0.35rem;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.tile-empty {
+  background: #ece4d7;
+  color: transparent;
+}
+
+.tile-low {
+  background: #fff8e7;
+  color: #4c3f2a;
+}
+
+.tile-mid {
+  background: #f2cc8f;
+  color: #2d4030;
+}
+
+.tile-high {
+  background: #2d4030;
+  color: #f4f0e8;
+}

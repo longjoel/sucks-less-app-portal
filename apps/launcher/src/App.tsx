@@ -83,6 +83,15 @@ const appCatalog: AppCatalogItem[] = [
     version: "1.0.0",
     icon: "✅",
     loadManifest: async () => (await import("@slap/daily-checklist")).dailyChecklistManifest
+  },
+  {
+    id: "game-2048",
+    title: "2048",
+    author: "Joel",
+    description: "Swipe and merge tiles to reach 2048.",
+    version: "1.0.0",
+    icon: "🔢",
+    loadManifest: async () => (await import("@slap/game-2048")).game2048Manifest
   }
 ];
 
