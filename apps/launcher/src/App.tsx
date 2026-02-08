@@ -40,8 +40,16 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 };
 
+type RouteState =
+  | { kind: "launcher" }
+  | { kind: "manage" }
+  | { kind: "app"; appId: string };
+
 const INSTALLED_APPS_KEY = "slap:launcher:installed-apps";
 const HIDDEN_APPS_KEY = "slap:launcher:hidden-apps";
+const APP_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const ROOT_GUARD_BASE = "slap-root-base";
+const ROOT_GUARD_ACTIVE = "slap-root-active";
 
 const appCatalog: AppCatalogItem[] = [
   {
@@ -275,11 +283,39 @@ const getInitialHiddenAppIds = (): string[] => {
   }
 };
 
+const routeToPath = (route: RouteState) => {
+  if (route.kind === "manage") return "/manage";
+  if (route.kind === "app") return `/app/${encodeURIComponent(route.appId)}`;
+  return "/";
+};
+
+const pathWithBase = (path: string) => `${APP_BASE}${path}`;
+
+const routeFromLocation = (): RouteState => {
+  if (typeof window === "undefined") return { kind: "launcher" };
+
+  const basePrefix = APP_BASE || "";
+  const pathname = window.location.pathname.startsWith(basePrefix)
+    ? window.location.pathname.slice(basePrefix.length) || "/"
+    : window.location.pathname;
+  const segments = pathname.split("/").filter(Boolean);
+
+  if (segments[0] === "manage" && segments.length === 1) return { kind: "manage" };
+  if (segments[0] === "app" && segments[1] && segments.length === 2) {
+    return { kind: "app", appId: decodeURIComponent(segments[1]) };
+  }
+
+  return { kind: "launcher" };
+};
+
+const routesMatch = (left: RouteState, right: RouteState) =>
+  left.kind === right.kind && (left.kind !== "app" || left.appId === right.appId);
+
 export const App = () => {
   const [installedApps, setInstalledApps] = useState<InstalledAppsState>(getInitialInstalledApps);
   const [hiddenAppIds, setHiddenAppIds] = useState<string[]>(getInitialHiddenAppIds);
+  const [route, setRoute] = useState<RouteState>(routeFromLocation);
   const [activeManifest, setActiveManifest] = useState<SlapApplicationManifest | null>(null);
-  const [screen, setScreen] = useState<"launcher" | "manage">("launcher");
   const [isStandalone, setIsStandalone] = useState(isStandaloneDisplayMode);
   const [launcherError, setLauncherError] = useState<string | null>(null);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
@@ -316,6 +352,7 @@ export const App = () => {
     () => (activeManifest ? createSlapAppContext(activeManifest.id) : null),
     [activeManifest?.id]
   );
+  const activeRouteAppId = route.kind === "app" ? route.appId : null;
 
   const refreshFootprint = async () => {
     const localData = getLocalStorageFootprint();
@@ -342,6 +379,25 @@ export const App = () => {
   const refreshInstallDebug = () => {
     const snapshot = getInstallDebugSnapshot();
     setInstallDebug({ ...snapshot, hasBeforeInstallPrompt: installPromptEvent !== null });
+  };
+
+  const navigateToRoute = (nextRoute: RouteState, options?: { replace?: boolean }) => {
+    if (typeof window !== "undefined") {
+      const targetPath = pathWithBase(routeToPath(nextRoute));
+      const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      if (targetPath !== currentPath) {
+        if (options?.replace) {
+          window.history.replaceState(null, "", targetPath);
+        } else {
+          window.history.pushState(null, "", targetPath);
+        }
+      }
+    }
+    setRoute(nextRoute);
+  };
+
+  const navigateToLauncher = (options?: { replace?: boolean }) => {
+    navigateToRoute({ kind: "launcher" }, options);
   };
 
   const syncInstalledApps = async () => {
@@ -405,6 +461,68 @@ export const App = () => {
   useEffect(() => {
     void syncInstalledApps();
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const popStateHandler = (event: PopStateEvent) => {
+      const nextRoute = routeFromLocation();
+      const guardState = (event.state as { slapRootGuard?: string } | null)?.slapRootGuard;
+
+      if (isStandaloneDisplayMode() && nextRoute.kind === "launcher" && guardState === ROOT_GUARD_BASE) {
+        window.history.pushState({ slapRootGuard: ROOT_GUARD_ACTIVE }, "", pathWithBase("/"));
+      }
+
+      setRoute((current) => (routesMatch(current, nextRoute) ? current : nextRoute));
+    };
+
+    window.addEventListener("popstate", popStateHandler);
+    return () => window.removeEventListener("popstate", popStateHandler);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isStandalone || route.kind !== "launcher") return;
+
+    const currentState = window.history.state as { slapRootGuard?: string } | null;
+    if (currentState?.slapRootGuard === ROOT_GUARD_ACTIVE) return;
+
+    const launcherPath = pathWithBase("/");
+    window.history.replaceState({ slapRootGuard: ROOT_GUARD_BASE }, "", launcherPath);
+    window.history.pushState({ slapRootGuard: ROOT_GUARD_ACTIVE }, "", launcherPath);
+  }, [isStandalone, route.kind]);
+
+  useEffect(() => {
+    if (!activeRouteAppId) {
+      setActiveManifest(null);
+      return;
+    }
+
+    const app = appCatalogById.get(activeRouteAppId);
+    if (!app || !installedApps[activeRouteAppId]) {
+      setLauncherError("That app is not installed.");
+      navigateToLauncher({ replace: true });
+      return;
+    }
+
+    let cancelled = false;
+    setLauncherError(null);
+
+    void app
+      .loadManifest()
+      .then((manifest) => {
+        if (!cancelled) setActiveManifest(manifest);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setLauncherError(error instanceof Error ? error.message : "Unable to load app.");
+        navigateToLauncher({ replace: true });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeRouteAppId, installedApps]);
 
   useEffect(() => {
     refreshInstallDebug();
@@ -534,25 +652,18 @@ export const App = () => {
     );
   };
 
-  const openApp = async (app: AppCatalogItem) => {
-    setLauncherError(null);
-
-    try {
-      const manifest = await app.loadManifest();
-      setActiveManifest(manifest);
-    } catch (error) {
-      setLauncherError(error instanceof Error ? error.message : "Unable to load app.");
-    }
+  const openApp = (app: AppCatalogItem) => {
+    navigateToRoute({ kind: "app", appId: app.id });
   };
 
-  if (activeManifest && activeCtx) {
+  if (route.kind === "app" && activeManifest && activeCtx) {
     const ActiveApplication = activeManifest.Application;
 
     return (
       <main className="page">
         <header className="header">
           <div className="header-inline">
-            <button type="button" className="back-button" onClick={() => setActiveManifest(null)}>
+            <button type="button" className="back-button" onClick={() => navigateToLauncher()}>
               Back
             </button>
             <h1>{activeManifest.title}</h1>
@@ -565,12 +676,12 @@ export const App = () => {
     );
   }
 
-  if (screen === "manage") {
+  if (route.kind === "manage") {
     return (
       <main className="page">
         <header className="header">
           <div className="header-inline">
-            <button type="button" className="back-button" onClick={() => setScreen("launcher")}>
+            <button type="button" className="back-button" onClick={() => navigateToLauncher()}>
               Back
             </button>
             <h1>Manage Apps</h1>
@@ -706,7 +817,7 @@ export const App = () => {
         {!isStandalone && installPromptEvent ? (
           <SlapButton title="Install App" onClick={() => void promptInstall()} buttonClassName="install-button" />
         ) : null}
-        <SlapButton title="Manage Apps" onClick={() => setScreen("manage")} />
+        <SlapButton title="Manage Apps" onClick={() => navigateToRoute({ kind: "manage" })} />
         <SlapButton
           title={isSyncingApps ? "Checking..." : "Check Updates"}
           onClick={() => void syncInstalledApps()}
