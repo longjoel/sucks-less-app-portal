@@ -8,6 +8,7 @@ export interface VirtualFileSystem {
 export interface SlapApplicationContext {
   appId: string;
   vfs: VirtualFileSystem;
+  renderMarkdown: (input: string) => string;
 }
 
 export interface SlapApplicationManifest {
@@ -25,6 +26,81 @@ const keyFor = (appId: string, path: string) => `slap:v1:${appId}:${path}`;
 const keyPrefix = (appId: string) => `slap:v1:${appId}:`;
 
 const inMemoryStore = new Map<string, string>();
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const renderInlineMarkdown = (value: string) =>
+  value
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+
+export const renderMarkdown = (input: string): string => {
+  const source = input.trim();
+  if (!source) {
+    return "";
+  }
+
+  const lines = source.split(/\r?\n/);
+  const html: string[] = [];
+  let isListOpen = false;
+
+  const closeListIfOpen = () => {
+    if (isListOpen) {
+      html.push("</ul>");
+      isListOpen = false;
+    }
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trimEnd();
+    const escaped = escapeHtml(line.trim());
+
+    if (!escaped) {
+      closeListIfOpen();
+      continue;
+    }
+
+    const headingMatch = escaped.match(/^(#{1,6})\s+(.*)$/);
+    if (headingMatch) {
+      closeListIfOpen();
+      const level = headingMatch[1].length;
+      const text = renderInlineMarkdown(headingMatch[2]);
+      html.push(`<h${level}>${text}</h${level}>`);
+      continue;
+    }
+
+    const listMatch = escaped.match(/^[-*]\s+(.*)$/);
+    if (listMatch) {
+      if (!isListOpen) {
+        html.push("<ul>");
+        isListOpen = true;
+      }
+      html.push(`<li>${renderInlineMarkdown(listMatch[1])}</li>`);
+      continue;
+    }
+
+    closeListIfOpen();
+
+    if (escaped.startsWith("&gt;")) {
+      const quote = escaped.replace(/^&gt;\s?/, "");
+      html.push(`<blockquote>${renderInlineMarkdown(quote)}</blockquote>`);
+      continue;
+    }
+
+    html.push(`<p>${renderInlineMarkdown(escaped)}</p>`);
+  }
+
+  closeListIfOpen();
+
+  return html.join("");
+};
 
 const hasLocalStorage = () => {
   try {
@@ -85,5 +161,6 @@ export const createLocalVfs = (appId: string): VirtualFileSystem => {
 
 export const createSlapAppContext = (appId: string): SlapApplicationContext => ({
   appId,
-  vfs: createLocalVfs(appId)
+  vfs: createLocalVfs(appId),
+  renderMarkdown
 });

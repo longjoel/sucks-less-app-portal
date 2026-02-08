@@ -417,10 +417,12 @@ export const App = () => {
     return (
       <main className="page">
         <header className="header">
-          <button type="button" className="back-button" onClick={() => setActiveManifest(null)}>
-            Back
-          </button>
-          <h1>{activeManifest.title}</h1>
+          <div className="header-inline">
+            <button type="button" className="back-button" onClick={() => setActiveManifest(null)}>
+              Back
+            </button>
+            <h1>{activeManifest.title}</h1>
+          </div>
         </header>
         <section className="app-panel">
           <ActiveApplication ctx={activeCtx} />
@@ -433,10 +435,12 @@ export const App = () => {
     return (
       <main className="page">
         <header className="header">
-          <button type="button" className="back-button" onClick={() => setScreen("launcher")}>
-            Back To Launcher
-          </button>
-          <h1>Manage Apps</h1>
+          <div className="header-inline">
+            <button type="button" className="back-button" onClick={() => setScreen("launcher")}>
+              Back
+            </button>
+            <h1>Manage Apps</h1>
+          </div>
           <p>Install and update app packages.</p>
         </header>
 
