@@ -2,8 +2,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig({
-  base: "/sucks-less-app-portal/",
+export default defineConfig(({ command }) => {
+  const isDev = command === "serve";
+  const appBase = isDev ? "/" : "/sucks-less-app-portal/";
+
+  return {
+  base: appBase,
   resolve: {
     alias: {
       "@slap/sdk": new URL("../../packages/sdk/src/index.ts", import.meta.url).pathname,
@@ -31,15 +35,15 @@ export default defineConfig({
         "screenshot-wide.png"
       ],
       manifest: {
-        id: "/sucks-less-app-portal/",
+        id: appBase,
         name: "Suck Less App Portal",
         short_name: "SLAP",
         description: "Offline-first launcher for small local apps.",
         theme_color: "#2d4030",
         background_color: "#f4f0e8",
         display: "standalone",
-        start_url: "/sucks-less-app-portal/",
-        scope: "/sucks-less-app-portal/",
+        start_url: appBase,
+        scope: appBase,
         icons: [
           {
             src: "icon-192.png",
@@ -76,4 +80,5 @@ export default defineConfig({
       }
     })
   ]
+  };
 });
