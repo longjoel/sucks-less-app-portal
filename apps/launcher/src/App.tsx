@@ -27,7 +27,16 @@ type Footprint = {
   quotaBytes: number | null;
 };
 
+type InstallDebug = {
+  displayModeStandalone: boolean;
+  iosStandalone: boolean;
+  hasBeforeInstallPrompt: boolean;
+  serviceWorkerControlled: boolean;
+  manifestLinkPresent: boolean;
+};
+
 const INSTALLED_APPS_KEY = "slap:launcher:installed-apps";
+const HIDDEN_APPS_KEY = "slap:launcher:hidden-apps";
 
 const appCatalog: AppCatalogItem[] = [
   {
@@ -94,34 +103,21 @@ const isVersionNewer = (latest: string, current: string) => {
     const nextPart = next[index] ?? 0;
     const previousPart = previous[index] ?? 0;
 
-    if (nextPart > previousPart) {
-      return true;
-    }
-
-    if (nextPart < previousPart) {
-      return false;
-    }
+    if (nextPart > previousPart) return true;
+    if (nextPart < previousPart) return false;
   }
 
   return false;
 };
 
 const formatBytes = (bytes: number | null) => {
-  if (bytes === null || Number.isNaN(bytes)) {
-    return "Unknown";
-  }
-
-  if (bytes < 1024) {
-    return `${bytes} B`;
-  }
+  if (bytes === null || Number.isNaN(bytes)) return "Unknown";
+  if (bytes < 1024) return `${bytes} B`;
 
   const kilobytes = bytes / 1024;
-  if (kilobytes < 1024) {
-    return `${kilobytes.toFixed(1)} KB`;
-  }
+  if (kilobytes < 1024) return `${kilobytes.toFixed(1)} KB`;
 
-  const megabytes = kilobytes / 1024;
-  return `${megabytes.toFixed(2)} MB`;
+  return `${(kilobytes / 1024).toFixed(2)} MB`;
 };
 
 const getLocalStorageFootprint = (): { localStorageBytes: number; appDataBytes: number } => {
@@ -134,17 +130,13 @@ const getLocalStorageFootprint = (): { localStorageBytes: number; appDataBytes: 
 
   for (let index = 0; index < window.localStorage.length; index += 1) {
     const key = window.localStorage.key(index);
-    if (!key) {
-      continue;
-    }
+    if (!key) continue;
 
     const value = window.localStorage.getItem(key) ?? "";
     const bytes = (key.length + value.length) * 2;
-
     localStorageBytes += bytes;
-    if (key.startsWith("slap:v1:")) {
-      appDataBytes += bytes;
-    }
+
+    if (key.startsWith("slap:v1:")) appDataBytes += bytes;
   }
 
   return { localStorageBytes, appDataBytes };
@@ -162,27 +154,37 @@ const getDefaultInstalledApps = (): InstalledAppsState => {
   };
 };
 
-const isStandaloneDisplayMode = () => {
+const getInstallDebugSnapshot = (): InstallDebug => {
   if (typeof window === "undefined") {
-    return false;
+    return {
+      displayModeStandalone: false,
+      iosStandalone: false,
+      hasBeforeInstallPrompt: false,
+      serviceWorkerControlled: false,
+      manifestLinkPresent: false
+    };
   }
 
-  const iosStandalone = Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
-  const displayModeStandalone = window.matchMedia("(display-mode: standalone)").matches;
+  return {
+    displayModeStandalone: window.matchMedia("(display-mode: standalone)").matches,
+    iosStandalone: Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone),
+    hasBeforeInstallPrompt: false,
+    serviceWorkerControlled: Boolean(window.navigator.serviceWorker?.controller),
+    manifestLinkPresent: Boolean(document.querySelector('link[rel="manifest"]'))
+  };
+};
 
-  return iosStandalone || displayModeStandalone;
+const isStandaloneDisplayMode = () => {
+  const snapshot = getInstallDebugSnapshot();
+  return snapshot.displayModeStandalone || snapshot.iosStandalone;
 };
 
 const getInitialInstalledApps = (): InstalledAppsState => {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return getDefaultInstalledApps();
-  }
+  if (typeof window === "undefined" || !window.localStorage) return getDefaultInstalledApps();
 
   try {
     const raw = window.localStorage.getItem(INSTALLED_APPS_KEY);
-    if (!raw) {
-      return getDefaultInstalledApps();
-    }
+    if (!raw) return getDefaultInstalledApps();
 
     const parsed = JSON.parse(raw) as unknown;
 
@@ -191,14 +193,9 @@ const getInitialInstalledApps = (): InstalledAppsState => {
       const now = new Date().toISOString();
 
       for (const value of parsed) {
-        if (typeof value !== "string") {
-          continue;
-        }
-
+        if (typeof value !== "string") continue;
         const catalog = appCatalogById.get(value);
-        if (!catalog) {
-          continue;
-        }
+        if (!catalog) continue;
 
         migrated[value] = {
           id: value,
@@ -216,9 +213,7 @@ const getInitialInstalledApps = (): InstalledAppsState => {
 
       for (const [id, record] of Object.entries(parsed as Record<string, unknown>)) {
         const catalog = appCatalogById.get(id);
-        if (!catalog || typeof record !== "object" || record === null) {
-          continue;
-        }
+        if (!catalog || typeof record !== "object" || record === null) continue;
 
         const candidate = record as Record<string, unknown>;
         const now = new Date().toISOString();
@@ -240,8 +235,26 @@ const getInitialInstalledApps = (): InstalledAppsState => {
   }
 };
 
+const getInitialHiddenAppIds = (): string[] => {
+  if (typeof window === "undefined" || !window.localStorage) return [];
+
+  try {
+    const raw = window.localStorage.getItem(HIDDEN_APPS_KEY);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+
+    const validIds = new Set(appCatalog.map((app) => app.id));
+    return parsed.filter((id): id is string => typeof id === "string" && validIds.has(id));
+  } catch {
+    return [];
+  }
+};
+
 export const App = () => {
   const [installedApps, setInstalledApps] = useState<InstalledAppsState>(getInitialInstalledApps);
+  const [hiddenAppIds, setHiddenAppIds] = useState<string[]>(getInitialHiddenAppIds);
   const [activeManifest, setActiveManifest] = useState<SlapApplicationManifest | null>(null);
   const [screen, setScreen] = useState<"launcher" | "manage">("launcher");
   const [isStandalone, setIsStandalone] = useState(isStandaloneDisplayMode);
@@ -254,16 +267,21 @@ export const App = () => {
     usedBytes: null,
     quotaBytes: null
   });
+  const [installDebug, setInstallDebug] = useState<InstallDebug>(getInstallDebugSnapshot);
 
-  const installedAppList = useMemo(() => {
-    return Object.values(installedApps)
-      .map((record) => ({
-        record,
-        catalog: appCatalogById.get(record.id) ?? null
-      }))
-      .filter((entry): entry is { record: InstalledAppRecord; catalog: AppCatalogItem } => entry.catalog !== null)
-      .sort((a, b) => a.catalog.title.localeCompare(b.catalog.title));
-  }, [installedApps]);
+  const installedAppList = useMemo(
+    () =>
+      Object.values(installedApps)
+        .map((record) => ({ record, catalog: appCatalogById.get(record.id) ?? null }))
+        .filter((entry): entry is { record: InstalledAppRecord; catalog: AppCatalogItem } => entry.catalog !== null)
+        .sort((a, b) => a.catalog.title.localeCompare(b.catalog.title)),
+    [installedApps]
+  );
+
+  const visibleInstalledAppList = useMemo(
+    () => installedAppList.filter(({ catalog }) => !hiddenAppIds.includes(catalog.id)),
+    [installedAppList, hiddenAppIds]
+  );
 
   const availableAppCatalog = useMemo(
     () => appCatalog.filter((app) => !installedApps[app.id]),
@@ -297,6 +315,14 @@ export const App = () => {
     });
   };
 
+  const refreshInstallDebug = () => {
+    const snapshot = getInstallDebugSnapshot();
+    setInstallDebug((current) => ({
+      ...snapshot,
+      hasBeforeInstallPrompt: current.hasBeforeInstallPrompt
+    }));
+  };
+
   const syncInstalledApps = async () => {
     setIsSyncingApps(true);
     setLauncherError(null);
@@ -309,9 +335,7 @@ export const App = () => {
 
       for (const entry of entries) {
         const catalog = appCatalogById.get(entry.id);
-        if (!catalog) {
-          continue;
-        }
+        if (!catalog) continue;
 
         if (isVersionNewer(catalog.version, entry.version)) {
           await catalog.loadManifest();
@@ -338,22 +362,23 @@ export const App = () => {
   };
 
   useEffect(() => {
-    if (typeof window === "undefined" || !window.localStorage) {
-      return;
-    }
-
+    if (typeof window === "undefined" || !window.localStorage) return;
     window.localStorage.setItem(INSTALLED_APPS_KEY, JSON.stringify(installedApps));
     void refreshFootprint();
   }, [installedApps]);
 
   useEffect(() => {
+    if (typeof window === "undefined" || !window.localStorage) return;
+    window.localStorage.setItem(HIDDEN_APPS_KEY, JSON.stringify(hiddenAppIds));
+  }, [hiddenAppIds]);
+
+  useEffect(() => {
     void refreshFootprint();
+    refreshInstallDebug();
   }, []);
 
   useEffect(() => {
-    if (!activeManifest) {
-      void refreshFootprint();
-    }
+    if (!activeManifest) void refreshFootprint();
   }, [activeManifest]);
 
   useEffect(() => {
@@ -361,22 +386,35 @@ export const App = () => {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+    if (typeof window === "undefined") return;
 
     const mediaQuery = window.matchMedia("(display-mode: standalone)");
-    const updateMode = () => setIsStandalone(isStandaloneDisplayMode());
+    const updateMode = () => {
+      setIsStandalone(isStandaloneDisplayMode());
+      refreshInstallDebug();
+    };
+
+    const beforeInstallPromptHandler = () => {
+      setInstallDebug((current) => ({ ...current, hasBeforeInstallPrompt: true }));
+    };
 
     updateMode();
+    window.addEventListener("beforeinstallprompt", beforeInstallPromptHandler);
 
     if (typeof mediaQuery.addEventListener === "function") {
       mediaQuery.addEventListener("change", updateMode);
-      return () => mediaQuery.removeEventListener("change", updateMode);
+    } else {
+      mediaQuery.addListener(updateMode);
     }
 
-    mediaQuery.addListener(updateMode);
-    return () => mediaQuery.removeListener(updateMode);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", beforeInstallPromptHandler);
+      if (typeof mediaQuery.addEventListener === "function") {
+        mediaQuery.removeEventListener("change", updateMode);
+      } else {
+        mediaQuery.removeListener(updateMode);
+      }
+    };
   }, []);
 
   const installApp = async (app: AppCatalogItem) => {
@@ -384,8 +422,8 @@ export const App = () => {
 
     try {
       await app.loadManifest();
-
       const now = new Date().toISOString();
+
       setInstalledApps((current) => ({
         ...current,
         [app.id]: {
@@ -425,6 +463,23 @@ export const App = () => {
     } catch (error) {
       setLauncherError(error instanceof Error ? error.message : "Unable to update app.");
     }
+  };
+
+  const uninstallApp = (appId: string) => {
+    setInstalledApps((current) => {
+      const next = { ...current };
+      delete next[appId];
+      return next;
+    });
+
+    setHiddenAppIds((current) => current.filter((id) => id !== appId));
+    setUpdateMessage(`Uninstalled ${appCatalogById.get(appId)?.title ?? appId}.`);
+  };
+
+  const toggleHiddenApp = (appId: string) => {
+    setHiddenAppIds((current) =>
+      current.includes(appId) ? current.filter((id) => id !== appId) : [...current, appId]
+    );
   };
 
   const openApp = async (app: AppCatalogItem) => {
@@ -468,11 +523,15 @@ export const App = () => {
             </button>
             <h1>Manage Apps</h1>
           </div>
-          <p>Install and update app packages.</p>
+          <p>Install, hide, update, or uninstall app packages.</p>
         </header>
 
         <div className="slap-button-row">
-          <SlapButton title={isSyncingApps ? "Checking..." : "Check For Updates"} onClick={() => void syncInstalledApps()} disabled={isSyncingApps} />
+          <SlapButton
+            title={isSyncingApps ? "Checking..." : "Check For Updates"}
+            onClick={() => void syncInstalledApps()}
+            disabled={isSyncingApps}
+          />
         </div>
 
         {updateMessage ? <p className="status-line">{updateMessage}</p> : null}
@@ -483,6 +542,7 @@ export const App = () => {
           <div className="app-grid">
             {installedAppList.map(({ catalog, record }) => {
               const hasUpdate = isVersionNewer(catalog.version, record.version);
+              const isHidden = hiddenAppIds.includes(catalog.id);
 
               return (
                 <article key={catalog.id} className="app-card">
@@ -492,6 +552,7 @@ export const App = () => {
                     <span>{catalog.description}</span>
                     <small>Installed v{record.version}</small>
                     <small>Latest v{catalog.version}</small>
+                    <small>{isHidden ? "Hidden on main screen" : "Visible on main screen"}</small>
                   </div>
                   <div className="slap-button-row">
                     <SlapButton
@@ -499,6 +560,11 @@ export const App = () => {
                       onClick={() => void updateApp(catalog, record.version)}
                       disabled={!hasUpdate}
                     />
+                    <SlapButton
+                      title={isHidden ? "Unhide" : "Hide"}
+                      onClick={() => toggleHiddenApp(catalog.id)}
+                    />
+                    <SlapButton title="Uninstall" onClick={() => uninstallApp(catalog.id)} />
                   </div>
                 </article>
               );
@@ -536,9 +602,41 @@ export const App = () => {
         <p>Installable offline-first app portal.</p>
       </header>
 
+      <section>
+        <h2 className="section-title">Installed Apps</h2>
+        <div className="app-launch-grid">
+          {visibleInstalledAppList.map(({ catalog }) => (
+            <button key={catalog.id} type="button" className="app-launch-tile" onClick={() => void openApp(catalog)}>
+              <span className="icon">{catalog.icon ?? "◻"}</span>
+              <span className="tile-caption">{catalog.title}</span>
+            </button>
+          ))}
+        </div>
+        {visibleInstalledAppList.length === 0 ? (
+          <p className="status-line">No visible installed apps. Unhide or install apps from Manage Apps.</p>
+        ) : null}
+      </section>
+
+      {updateMessage ? <p className="status-line">{updateMessage}</p> : null}
+      {launcherError ? <p className="status-line">Error: {launcherError}</p> : null}
+
       <section className="status-panel">
         <p className="status-line">
           PWA mode: <strong>{isStandalone ? "Installed" : "Browser tab"}</strong>
+        </p>
+        <p className="status-line">
+          Install debug: <strong>{installDebug.displayModeStandalone ? "display-mode standalone" : "display-mode browser"}</strong>, {" "}
+          <strong>{installDebug.iosStandalone ? "ios standalone" : "ios browser"}</strong>
+        </p>
+        <p className="status-line">
+          Manifest link: <strong>{installDebug.manifestLinkPresent ? "present" : "missing"}</strong>, SW controller:{" "}
+          <strong>{installDebug.serviceWorkerControlled ? "active" : "none"}</strong>
+        </p>
+        <p className="status-line">
+          beforeinstallprompt seen: <strong>{installDebug.hasBeforeInstallPrompt ? "yes" : "no"}</strong>
+        </p>
+        <p className="status-line">
+          Hidden apps: <strong>{hiddenAppIds.length}</strong>
         </p>
         <p className="status-line">
           SLAP app data footprint: <strong>{formatBytes(footprint.appDataBytes)}</strong>
@@ -554,31 +652,12 @@ export const App = () => {
 
       <div className="slap-button-row">
         <SlapButton title="Manage Apps" onClick={() => setScreen("manage")} />
-        <SlapButton title={isSyncingApps ? "Checking..." : "Check Updates"} onClick={() => void syncInstalledApps()} disabled={isSyncingApps} />
+        <SlapButton
+          title={isSyncingApps ? "Checking..." : "Check Updates"}
+          onClick={() => void syncInstalledApps()}
+          disabled={isSyncingApps}
+        />
       </div>
-
-      {updateMessage ? <p className="status-line">{updateMessage}</p> : null}
-      {launcherError ? <p className="status-line">Error: {launcherError}</p> : null}
-
-      <section>
-        <h2 className="section-title">Installed Apps</h2>
-        <div className="app-grid">
-          {installedAppList.map(({ catalog, record }) => (
-            <article key={catalog.id} className="app-card">
-              <span className="icon">{catalog.icon ?? "◻"}</span>
-              <div className="card-copy">
-                <strong>{catalog.title}</strong>
-                <span>{catalog.description}</span>
-                <small>Installed v{record.version}</small>
-                <small>Latest v{catalog.version}</small>
-              </div>
-              <div className="slap-button-row">
-                <SlapButton title="Open" onClick={() => void openApp(catalog)} />
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
     </main>
   );
 };
