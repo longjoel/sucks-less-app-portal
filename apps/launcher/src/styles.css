@@ -360,3 +360,33 @@ body {
   background: #2d4030;
   color: #f4f0e8;
 }
+
+.minesweeper-grid {
+  width: 100%;
+  max-width: 320px;
+  display: grid;
+  gap: 0.2rem;
+  background: #c5b9a5;
+  border-radius: 0.6rem;
+  padding: 0.25rem;
+}
+
+.minesweeper-cell {
+  aspect-ratio: 1 / 1;
+  border: 0;
+  border-radius: 0.3rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.ms-hidden {
+  background: #ece4d7;
+}
+
+.ms-revealed {
+  background: #fffdf8;
+}
+
+.ms-flagged {
+  background: #f2cc8f;
+}

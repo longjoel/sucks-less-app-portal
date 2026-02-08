@@ -92,6 +92,15 @@ const appCatalog: AppCatalogItem[] = [
     version: "1.0.0",
     icon: "🔢",
     loadManifest: async () => (await import("@slap/game-2048")).game2048Manifest
+  },
+  {
+    id: "minesweeper",
+    title: "Minesweeper",
+    author: "Joel",
+    description: "Reveal safe tiles and avoid mines.",
+    version: "1.0.0",
+    icon: "💣",
+    loadManifest: async () => (await import("@slap/minesweeper")).minesweeperManifest
   }
 ];
 
