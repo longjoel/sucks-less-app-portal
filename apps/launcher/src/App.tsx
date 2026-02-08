@@ -123,6 +123,15 @@ const appCatalog: AppCatalogItem[] = [
     version: "1.0.0",
     icon: "🎿",
     loadManifest: async () => (await import("@slap/ski-free")).skiFreeManifest
+  },
+  {
+    id: "simon-says",
+    title: "Simon Says",
+    author: "Joel",
+    description: "Repeat the growing 4-region light pattern.",
+    version: "1.0.0",
+    icon: "🟩",
+    loadManifest: async () => (await import("@slap/simon-says")).simonSaysManifest
   }
 ];
 
@@ -325,6 +334,9 @@ export const App = () => {
   const [hiddenAppIds, setHiddenAppIds] = useState<string[]>(getInitialHiddenAppIds);
   const [route, setRoute] = useState<RouteState>(routeFromLocation);
   const [activeManifest, setActiveManifest] = useState<SlapApplicationManifest | null>(null);
+  const [manageTab, setManageTab] = useState<"installed" | "available">("installed");
+  const [manageFilter, setManageFilter] = useState("");
+  const [manageExpandedId, setManageExpandedId] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(isStandaloneDisplayMode);
   const [launcherError, setLauncherError] = useState<string | null>(null);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
@@ -355,6 +367,25 @@ export const App = () => {
   const availableAppCatalog = useMemo(
     () => appCatalog.filter((app) => !installedApps[app.id]),
     [installedApps]
+  );
+  const normalizedManageFilter = manageFilter.trim().toLowerCase();
+  const filteredInstalledAppList = useMemo(
+    () =>
+      installedAppList.filter(({ catalog }) => {
+        if (!normalizedManageFilter) return true;
+        const haystack = `${catalog.title} ${catalog.description} ${catalog.id}`.toLowerCase();
+        return haystack.includes(normalizedManageFilter);
+      }),
+    [installedAppList, normalizedManageFilter]
+  );
+  const filteredAvailableAppCatalog = useMemo(
+    () =>
+      availableAppCatalog.filter((app) => {
+        if (!normalizedManageFilter) return true;
+        const haystack = `${app.title} ${app.description} ${app.id}`.toLowerCase();
+        return haystack.includes(normalizedManageFilter);
+      }),
+    [availableAppCatalog, normalizedManageFilter]
   );
 
   const activeCtx = useMemo(
@@ -709,60 +740,138 @@ export const App = () => {
         {updateMessage ? <p className="status-line">{updateMessage}</p> : null}
         {launcherError ? <p className="status-line">Error: {launcherError}</p> : null}
 
-        <section>
-          <h2 className="section-title">Installed Apps</h2>
-          <div className="app-grid">
-            {installedAppList.map(({ catalog, record }) => {
-              const hasUpdate = isVersionNewer(catalog.version, record.version);
-              const isHidden = hiddenAppIds.includes(catalog.id);
+        <label className="manage-filter-wrap">
+          <span>Filter Apps</span>
+          <input
+            className="slap-input manage-filter-input"
+            type="text"
+            value={manageFilter}
+            onChange={(event) => {
+              setManageFilter(event.target.value);
+              setManageExpandedId(null);
+            }}
+            placeholder="Search by name or description"
+          />
+        </label>
 
-              return (
-                <article key={catalog.id} className="app-card">
-                  <span className="icon">{catalog.icon ?? "◻"}</span>
-                  <div className="card-copy">
-                    <strong>{catalog.title}</strong>
-                    <span>{catalog.description}</span>
-                    <small>Installed v{record.version}</small>
-                    <small>Latest v{catalog.version}</small>
-                    <small>{isHidden ? "Hidden on main screen" : "Visible on main screen"}</small>
+        <div className="manage-tabs" role="tablist" aria-label="Manage app lists">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={manageTab === "installed"}
+            className={`manage-tab${manageTab === "installed" ? " is-active" : ""}`}
+            onClick={() => {
+              setManageTab("installed");
+              setManageExpandedId(null);
+            }}
+          >
+            Installed ({filteredInstalledAppList.length})
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={manageTab === "available"}
+            className={`manage-tab${manageTab === "available" ? " is-active" : ""}`}
+            onClick={() => {
+              setManageTab("available");
+              setManageExpandedId(null);
+            }}
+          >
+            Not Installed ({filteredAvailableAppCatalog.length})
+          </button>
+        </div>
+
+        {manageTab === "installed" ? (
+          <section>
+            <h2 className="section-title">Installed Apps</h2>
+            <div className="app-grid app-grid-compact">
+              {filteredInstalledAppList.map(({ catalog, record }) => {
+                const hasUpdate = isVersionNewer(catalog.version, record.version);
+                const isHidden = hiddenAppIds.includes(catalog.id);
+                const itemId = `installed:${catalog.id}`;
+
+                return (
+                  <details key={catalog.id} className="manage-app-item" open={manageExpandedId === itemId}>
+                    <summary
+                      className="manage-app-summary"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setManageExpandedId((current) => (current === itemId ? null : itemId));
+                      }}
+                    >
+                      <span className="icon">{catalog.icon ?? "◻"}</span>
+                      <span className="manage-app-copy">
+                        <strong>{catalog.title}</strong>
+                        <small>
+                          Installed v{record.version} | Latest v{catalog.version}
+                          {hasUpdate ? " | Update available" : ""}
+                        </small>
+                      </span>
+                    </summary>
+                    <div className="manage-app-body">
+                      <span>{catalog.description}</span>
+                      <small>{isHidden ? "Hidden on main screen" : "Visible on main screen"}</small>
+                      <div className="slap-button-row">
+                        <SlapButton
+                          title={hasUpdate ? "Install Latest" : "Up To Date"}
+                          onClick={() => void updateApp(catalog, record.version)}
+                          disabled={!hasUpdate}
+                        />
+                        <SlapButton
+                          title={isHidden ? "Unhide" : "Hide"}
+                          onClick={() => toggleHiddenApp(catalog.id)}
+                        />
+                        <SlapButton title="Uninstall" onClick={() => uninstallApp(catalog.id)} />
+                      </div>
+                    </div>
+                  </details>
+                );
+              })}
+              {filteredInstalledAppList.length === 0 ? (
+                <p className="status-line">
+                  {installedAppList.length === 0 ? "No apps installed yet." : "No installed apps match this filter."}
+                </p>
+              ) : null}
+            </div>
+          </section>
+        ) : (
+          <section>
+            <h2 className="section-title">Not Installed Apps</h2>
+            <div className="app-grid app-grid-compact">
+              {filteredAvailableAppCatalog.map((app) => {
+                const itemId = `available:${app.id}`;
+                return (
+                <details key={app.id} className="manage-app-item" open={manageExpandedId === itemId}>
+                  <summary
+                    className="manage-app-summary"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setManageExpandedId((current) => (current === itemId ? null : itemId));
+                    }}
+                  >
+                    <span className="icon">{app.icon ?? "◻"}</span>
+                    <span className="manage-app-copy">
+                      <strong>{app.title}</strong>
+                      <small>Latest v{app.version}</small>
+                    </span>
+                  </summary>
+                  <div className="manage-app-body">
+                    <span>{app.description}</span>
+                    <div className="slap-button-row">
+                      <SlapButton title="Install" onClick={() => void installApp(app)} />
+                    </div>
                   </div>
-                  <div className="slap-button-row">
-                    <SlapButton
-                      title={hasUpdate ? "Install Latest" : "Up To Date"}
-                      onClick={() => void updateApp(catalog, record.version)}
-                      disabled={!hasUpdate}
-                    />
-                    <SlapButton
-                      title={isHidden ? "Unhide" : "Hide"}
-                      onClick={() => toggleHiddenApp(catalog.id)}
-                    />
-                    <SlapButton title="Uninstall" onClick={() => uninstallApp(catalog.id)} />
-                  </div>
-                </article>
+                </details>
               );
-            })}
-          </div>
-        </section>
-
-        <section>
-          <h2 className="section-title">Available Apps</h2>
-          <div className="app-grid">
-            {availableAppCatalog.map((app) => (
-              <article key={app.id} className="app-card">
-                <span className="icon">{app.icon ?? "◻"}</span>
-                <div className="card-copy">
-                  <strong>{app.title}</strong>
-                  <span>{app.description}</span>
-                  <small>Latest v{app.version}</small>
-                </div>
-                <div className="slap-button-row">
-                  <SlapButton title="Install" onClick={() => void installApp(app)} />
-                </div>
-              </article>
-            ))}
-            {availableAppCatalog.length === 0 ? <p className="status-line">All apps are installed.</p> : null}
-          </div>
-        </section>
+              })}
+              {filteredAvailableAppCatalog.length === 0 ? (
+                <p className="status-line">
+                  {availableAppCatalog.length === 0 ? "All apps are installed." : "No apps match this filter."}
+                </p>
+              ) : null}
+            </div>
+          </section>
+        )}
       </main>
     );
   }

@@ -68,6 +68,10 @@ body {
   grid-template-columns: 1fr;
 }
 
+.app-grid-compact {
+  gap: 0.4rem;
+}
+
 .app-launch-grid {
   display: grid;
   gap: 0.4rem;
@@ -107,6 +111,83 @@ body {
 
 .app-card:hover {
   border-color: var(--accent);
+}
+
+.manage-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin: 0.6rem 0;
+}
+
+.manage-filter-wrap {
+  display: grid;
+  gap: 0.22rem;
+  margin-top: 0.6rem;
+}
+
+.manage-filter-input {
+  width: 100%;
+  max-width: none;
+}
+
+.manage-tab {
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: #ece4d7;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 0.35rem 0.45rem;
+}
+
+.manage-tab.is-active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
+.manage-app-item {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--panel);
+  padding: 0.45rem 0.55rem;
+}
+
+.manage-app-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.manage-app-summary::-webkit-details-marker {
+  display: none;
+}
+
+.manage-app-copy {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.manage-app-copy small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.manage-app-body {
+  margin-top: 0.4rem;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.manage-app-body span,
+.manage-app-body small {
+  color: var(--muted);
+  font-size: 0.84rem;
 }
 
 .icon {
@@ -440,4 +521,24 @@ body {
   max-width: 280px;
   display: flex;
   justify-content: center;
+}
+
+.simon-canvas {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: #f4f0e8;
+  touch-action: none;
+}
+
+.simon-controls {
+  width: 100%;
+  max-width: 280px;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
 }
