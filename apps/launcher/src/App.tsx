@@ -114,6 +114,15 @@ const appCatalog: AppCatalogItem[] = [
     version: "1.0.0",
     icon: "💣",
     loadManifest: async () => (await import("@slap/minesweeper")).minesweeperManifest
+  },
+  {
+    id: "ski-free",
+    title: "Ski Free",
+    author: "Joel",
+    description: "Dodge obstacles and survive as long as possible.",
+    version: "1.0.0",
+    icon: "🎿",
+    loadManifest: async () => (await import("@slap/ski-free")).skiFreeManifest
   }
 ];
 

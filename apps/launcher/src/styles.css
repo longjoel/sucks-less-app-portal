@@ -394,3 +394,50 @@ body {
 .ms-flagged {
   background: #f2cc8f;
 }
+
+.skifree-layout {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.skifree-layout .slap-inline-text {
+  font-size: 0.86rem;
+}
+
+.skifree-stage {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.skifree-canvas {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: #edf5ff;
+}
+
+.skifree-hud {
+  position: absolute;
+  top: 0.35rem;
+  left: 0.35rem;
+  right: 0.35rem;
+  display: grid;
+  gap: 0.12rem;
+  padding: 0.3rem 0.45rem;
+  border-radius: 0.45rem;
+  background: rgba(255, 253, 248, 0.88);
+  color: #2d4030;
+  font-size: 0.8rem;
+  line-height: 1.1;
+}
+
+.skifree-controls {
+  width: 100%;
+  max-width: 280px;
+  display: flex;
+  justify-content: center;
+}

@@ -18,7 +18,8 @@ export default defineConfig(({ command }) => {
         "@slap/box-breathing": new URL("../box-breathing/src/index.tsx", import.meta.url).pathname,
         "@slap/daily-checklist": new URL("../daily-checklist/src/index.tsx", import.meta.url).pathname,
         "@slap/game-2048": new URL("../game-2048/src/index.tsx", import.meta.url).pathname,
-        "@slap/minesweeper": new URL("../minesweeper/src/index.tsx", import.meta.url).pathname
+        "@slap/minesweeper": new URL("../minesweeper/src/index.tsx", import.meta.url).pathname,
+        "@slap/ski-free": new URL("../ski-free/src/index.tsx", import.meta.url).pathname
       }
     },
     plugins: [
