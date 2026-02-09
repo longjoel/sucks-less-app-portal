@@ -863,10 +863,6 @@ export const App = () => {
       }));
 
       setUpdateMessage(`Installed ${app.title} v${app.version}.`);
-
-      if (import.meta.env.PROD && app.standalonePath) {
-        window.location.assign(app.standalonePath);
-      }
     } catch (error) {
       setLauncherError(error instanceof Error ? error.message : "Unable to install app.");
     }
