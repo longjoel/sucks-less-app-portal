@@ -525,6 +525,7 @@ export const App = () => {
   const [activeManifest, setActiveManifest] = useState<SlapApplicationManifest | null>(null);
   const [manageFilter, setManageFilter] = useState("");
   const [manageExpandedId, setManageExpandedId] = useState<string | null>(null);
+  const [cleanupMode, setCleanupMode] = useState(false);
   const [isStandalone, setIsStandalone] = useState(isStandaloneDisplayMode);
   const [launcherError, setLauncherError] = useState<string | null>(null);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
@@ -851,6 +852,38 @@ export const App = () => {
     }
   };
 
+  const sharePortal = async () => {
+    if (typeof window === "undefined") return;
+    setLauncherError(null);
+
+    try {
+      const url = window.location.href || "https://longjoel.github.io/sucks-less-app-portal/";
+      const shareData = {
+        title: "SLAP",
+        text: "Suck Less App Portal",
+        url
+      };
+
+      if (navigator.share) {
+        await navigator.share(shareData);
+        setUpdateMessage("Share sheet opened.");
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        setUpdateMessage("Link copied to clipboard.");
+        return;
+      }
+
+      window.prompt("Copy this link:", url);
+    } catch (error) {
+      const err = error as { name?: string };
+      if (err?.name === "AbortError") return;
+      setLauncherError(error instanceof Error ? error.message : "Unable to share.");
+    }
+  };
+
   const installApp = async (app: AppCatalogItem) => {
     setLauncherError(null);
 
@@ -1116,7 +1149,7 @@ export const App = () => {
                 <span className="icon">{catalog.icon ?? "◻"}</span>
                 <span className="tile-caption">{catalog.title}</span>
               </button>
-              {homeTab === "all" ? (
+              {homeTab === "all" && cleanupMode ? (
                 <button
                   type="button"
                   className="app-remove-badge"
@@ -1153,7 +1186,9 @@ export const App = () => {
         {!isStandalone && installPromptEvent ? (
           <SlapButton title="Install App" onClick={() => void promptInstall()} buttonClassName="install-button" />
         ) : null}
+        <SlapButton title={cleanupMode ? "Done" : "Cleanup"} onClick={() => setCleanupMode((current) => !current)} />
         <SlapButton title="Manage Apps" onClick={() => navigateToRoute({ kind: "manage" })} />
+        <SlapButton title="Share" onClick={() => void sharePortal()} />
         <SlapButton
           title={isSyncingApps ? "Checking..." : "Check Updates"}
           onClick={() => void syncInstalledApps()}
