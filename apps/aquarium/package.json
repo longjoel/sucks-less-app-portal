@@ -6,8 +6,8 @@
   "main": "src/index.tsx",
   "types": "src/index.tsx",
   "dependencies": {
-    "@slap/sdk": "0.1.0",
-    "@slap/ui": "0.1.0",
+    "@slap/sdk": "workspace:*",
+    "@slap/ui": "workspace:*",
     "react": "^18.3.1"
   },
   "devDependencies": {

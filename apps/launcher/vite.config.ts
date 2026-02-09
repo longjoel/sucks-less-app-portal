@@ -5,6 +5,7 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig(({ command }) => {
   const isDev = command === "serve";
   const appBase = isDev ? "/" : "/sucks-less-app-portal/";
+  const escapedBase = appBase.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
 
   return {
     base: appBase,
@@ -40,6 +41,9 @@ export default defineConfig(({ command }) => {
         registerType: "prompt",
         devOptions: {
           enabled: true
+        },
+        workbox: {
+          navigateFallbackDenylist: [new RegExp(`^${escapedBase}apps/`)]
         },
         includeAssets: [
           "favicon.svg",

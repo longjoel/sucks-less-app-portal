@@ -22,26 +22,33 @@ Design goals:
 1. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 2. Start local dev server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 3. Build production output into `docs/`:
 
 ```bash
-npm run build
+pnpm build
 ```
 
 4. Preview production build locally:
 
 ```bash
-npm run preview
+pnpm preview
 ```
+
+## Monorepo Tooling
+
+This repo uses `pnpm` workspaces and `turbo` for task orchestration:
+- `pnpm dev` runs the launcher dev server
+- `pnpm build` builds the launcher and all standalone app bundles
+- `pnpm typecheck` runs TypeScript checks across workspaces
 
 ## GitHub Pages
 
@@ -50,7 +57,7 @@ This repo is configured so the launcher build is emitted to `docs/`.
 1. Run:
 
 ```bash
-npm run build
+pnpm build
 ```
 
 2. In GitHub repo settings, set Pages source to:

@@ -2,8 +2,9 @@ import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { apps } from "../apps/standalone/apps.mjs";
 
-const viteBin = resolve("node_modules/.bin/vite");
-const viteCommand = process.platform === "win32" ? `${viteBin}.cmd` : viteBin;
+const pnpmBin = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+const launcherDir = resolve("apps/launcher");
+const standaloneConfig = resolve("apps/standalone/vite.config.ts");
 
 for (const app of apps) {
   const env = {
@@ -17,11 +18,12 @@ for (const app of apps) {
   };
 
   const result = spawnSync(
-    viteCommand,
-    ["build", "--config", "apps/standalone/vite.config.ts"],
+    pnpmBin,
+    ["exec", "vite", "build", "--config", standaloneConfig],
     {
       stdio: "inherit",
-      env
+      env,
+      cwd: launcherDir
     }
   );
 

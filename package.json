@@ -2,15 +2,19 @@
   "name": "sucks-less-app-portal",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.29.2",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run -w @slap/launcher dev",
-    "build": "npm run -w @slap/launcher build && npm run build:standalone",
+    "dev": "turbo run dev --filter=@slap/launcher",
+    "build": "turbo run build --filter=@slap/launcher && turbo run build:standalone",
     "build:standalone": "node scripts/build-standalone.mjs",
-    "preview": "npm run -w @slap/launcher preview",
-    "typecheck": "npm run --workspaces typecheck"
+    "preview": "turbo run preview --filter=@slap/launcher",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "turbo": "^2.2.0"
   }
 }
