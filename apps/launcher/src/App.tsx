@@ -76,14 +76,34 @@ const appCatalog: AppCatalogItem[] = [
     loadManifest: async () => (await import("@slap/journal")).journalManifest
   },
   {
-    id: "mh-checkin",
-    title: "MH Checkin",
+    id: "mh-phq9",
+    title: "PHQ-9 Check-in",
     author: "Joel",
-    description: "Take PHQ-9 or GAD-7, track trends, export results.",
+    description: "PHQ-9 screening with history, trends, and export.",
     tags: ["mental-health", "assessment", "tracking"],
     version: "1.0.0",
-    icon: "🧠",
-    loadManifest: async () => (await import("@slap/mh-checkin")).mhCheckinManifest
+    icon: "PHQ-9",
+    loadManifest: async () => (await import("@slap/mh-phq9")).mhPhq9Manifest
+  },
+  {
+    id: "mh-gad7",
+    title: "GAD-7 Check-in",
+    author: "Joel",
+    description: "GAD-7 screening with history, trends, and export.",
+    tags: ["mental-health", "assessment", "tracking"],
+    version: "1.0.0",
+    icon: "GAD-7",
+    loadManifest: async () => (await import("@slap/mh-gad7")).mhGad7Manifest
+  },
+  {
+    id: "mh-abc",
+    title: "ABC Worksheet",
+    author: "Joel",
+    description: "ABC worksheet entries with trends and export.",
+    tags: ["mental-health", "reflection", "worksheet"],
+    version: "1.0.0",
+    icon: "ABC",
+    loadManifest: async () => (await import("@slap/mh-abc")).mhAbcManifest
   },
   {
     id: "box-breathing",

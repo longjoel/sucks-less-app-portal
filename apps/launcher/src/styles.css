@@ -363,6 +363,27 @@ body {
   gap: 0.3rem;
 }
 
+.slap-slider-row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.slap-slider {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.slap-slider-labels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.slap-slider-labels span {
+  text-align: center;
+}
+
 .slap-inline-text {
   color: var(--muted);
   margin: 0;
