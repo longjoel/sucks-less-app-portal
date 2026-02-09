@@ -48,6 +48,8 @@ type RouteState =
 
 const INSTALLED_APPS_KEY = "slap:launcher:installed-apps";
 const HIDDEN_APPS_KEY = "slap:launcher:hidden-apps";
+const FAVORITE_APPS_KEY = "slap:launcher:favorite-apps";
+const RECENT_APPS_KEY = "slap:launcher:recent-apps";
 const APP_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const ROOT_GUARD_BASE = "slap-root-base";
 const ROOT_GUARD_ACTIVE = "slap-root-active";
@@ -152,6 +154,46 @@ const appCatalog: AppCatalogItem[] = [
     version: "1.0.0",
     icon: "🎲",
     loadManifest: async () => (await import("@slap/dice-roller")).diceRollerManifest
+  },
+  {
+    id: "compass",
+    title: "Compass",
+    author: "Joel",
+    description: "Basic heading compass using device orientation sensors.",
+    tags: ["utility", "sensors", "navigation"],
+    version: "1.0.0",
+    icon: "🧭",
+    loadManifest: async () => (await import("@slap/compass")).compassManifest
+  },
+  {
+    id: "countdown",
+    title: "Countdown",
+    author: "Joel",
+    description: "Track days until upcoming events with optional notifications.",
+    tags: ["planning", "dates", "notifications"],
+    version: "1.0.0",
+    icon: "⏳",
+    loadManifest: async () => (await import("@slap/countdown")).countdownManifest
+  },
+  {
+    id: "stopwatch",
+    title: "Stopwatch",
+    author: "Joel",
+    description: "Simple stopwatch with lap recording.",
+    tags: ["utility", "time", "productivity"],
+    version: "1.0.0",
+    icon: "⏱️",
+    loadManifest: async () => (await import("@slap/stopwatch")).stopwatchManifest
+  },
+  {
+    id: "minute-timer",
+    title: "Minute Timer",
+    author: "Joel",
+    description: "Simple minute timer with optional notifications.",
+    tags: ["utility", "time", "notifications"],
+    version: "1.0.0",
+    icon: "⏲️",
+    loadManifest: async () => (await import("@slap/minute-timer")).minuteTimerManifest
   }
 ];
 
@@ -321,6 +363,36 @@ const getInitialHiddenAppIds = (): string[] => {
   }
 };
 
+const getInitialFavoriteAppIds = (): string[] => {
+  if (typeof window === "undefined" || !window.localStorage) return [];
+
+  try {
+    const raw = window.localStorage.getItem(FAVORITE_APPS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    const validIds = new Set(appCatalog.map((app) => app.id));
+    return parsed.filter((id): id is string => typeof id === "string" && validIds.has(id));
+  } catch {
+    return [];
+  }
+};
+
+const getInitialRecentAppIds = (): string[] => {
+  if (typeof window === "undefined" || !window.localStorage) return [];
+
+  try {
+    const raw = window.localStorage.getItem(RECENT_APPS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    const validIds = new Set(appCatalog.map((app) => app.id));
+    return parsed.filter((id): id is string => typeof id === "string" && validIds.has(id));
+  } catch {
+    return [];
+  }
+};
+
 const routeToPath = (route: RouteState) => {
   if (route.kind === "manage") return "/manage";
   if (route.kind === "app") return `/app/${encodeURIComponent(route.appId)}`;
@@ -352,6 +424,9 @@ const routesMatch = (left: RouteState, right: RouteState) =>
 export const App = () => {
   const [installedApps, setInstalledApps] = useState<InstalledAppsState>(getInitialInstalledApps);
   const [hiddenAppIds, setHiddenAppIds] = useState<string[]>(getInitialHiddenAppIds);
+  const [favoriteAppIds, setFavoriteAppIds] = useState<string[]>(getInitialFavoriteAppIds);
+  const [recentAppIds, setRecentAppIds] = useState<string[]>(getInitialRecentAppIds);
+  const [homeTab, setHomeTab] = useState<"favorites" | "recent" | "all">("all");
   const [route, setRoute] = useState<RouteState>(routeFromLocation);
   const [activeManifest, setActiveManifest] = useState<SlapApplicationManifest | null>(null);
   const [manageTab, setManageTab] = useState<"installed" | "available" | "all">("installed");
@@ -384,6 +459,34 @@ export const App = () => {
     () => installedAppList.filter(({ catalog }) => !hiddenAppIds.includes(catalog.id)),
     [installedAppList, hiddenAppIds]
   );
+  const visibleById = useMemo(
+    () => new Map(visibleInstalledAppList.map((entry) => [entry.catalog.id, entry])),
+    [visibleInstalledAppList]
+  );
+  const favoriteVisibleInstalledAppList = useMemo(
+    () =>
+      visibleInstalledAppList.filter(({ catalog }) => favoriteAppIds.includes(catalog.id)),
+    [visibleInstalledAppList, favoriteAppIds]
+  );
+  const recentVisibleInstalledAppList = useMemo(
+    () =>
+      recentAppIds
+        .map((id) => visibleById.get(id) ?? null)
+        .filter((entry): entry is { record: InstalledAppRecord; catalog: AppCatalogItem } => entry !== null),
+    [recentAppIds, visibleById]
+  );
+  const homeTabOptions = useMemo(() => {
+    const options: Array<"favorites" | "recent" | "all"> = [];
+    if (favoriteVisibleInstalledAppList.length > 0) options.push("favorites");
+    if (recentVisibleInstalledAppList.length > 0) options.push("recent");
+    options.push("all");
+    return options;
+  }, [favoriteVisibleInstalledAppList.length, recentVisibleInstalledAppList.length]);
+  const homeActiveList = useMemo(() => {
+    if (homeTab === "favorites") return favoriteVisibleInstalledAppList;
+    if (homeTab === "recent") return recentVisibleInstalledAppList;
+    return visibleInstalledAppList;
+  }, [homeTab, favoriteVisibleInstalledAppList, recentVisibleInstalledAppList, visibleInstalledAppList]);
 
   const availableAppCatalog = useMemo(
     () => appCatalog.filter((app) => !installedApps[app.id]),
@@ -523,6 +626,22 @@ export const App = () => {
     if (typeof window === "undefined" || !window.localStorage) return;
     window.localStorage.setItem(HIDDEN_APPS_KEY, JSON.stringify(hiddenAppIds));
   }, [hiddenAppIds]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.localStorage) return;
+    window.localStorage.setItem(FAVORITE_APPS_KEY, JSON.stringify(favoriteAppIds));
+  }, [favoriteAppIds]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.localStorage) return;
+    window.localStorage.setItem(RECENT_APPS_KEY, JSON.stringify(recentAppIds));
+  }, [recentAppIds]);
+
+  useEffect(() => {
+    if (!homeTabOptions.includes(homeTab)) {
+      setHomeTab(homeTabOptions[0]);
+    }
+  }, [homeTabOptions, homeTab]);
 
   useEffect(() => {
     void refreshFootprint();
@@ -718,6 +837,8 @@ export const App = () => {
     });
 
     setHiddenAppIds((current) => current.filter((id) => id !== appId));
+    setFavoriteAppIds((current) => current.filter((id) => id !== appId));
+    setRecentAppIds((current) => current.filter((id) => id !== appId));
     setUpdateMessage(`Uninstalled ${appCatalogById.get(appId)?.title ?? appId}.`);
   };
 
@@ -727,7 +848,18 @@ export const App = () => {
     );
   };
 
+  const toggleFavoriteApp = (appId: string) => {
+    setFavoriteAppIds((current) =>
+      current.includes(appId) ? current.filter((id) => id !== appId) : [appId, ...current]
+    );
+  };
+
+  const trackRecentApp = (appId: string) => {
+    setRecentAppIds((current) => [appId, ...current.filter((id) => id !== appId)].slice(0, 8));
+  };
+
   const openApp = (app: AppCatalogItem) => {
+    trackRecentApp(app.id);
     navigateToRoute({ kind: "app", appId: app.id });
   };
 
@@ -1046,16 +1178,61 @@ export const App = () => {
       </header>
 
       <section>
-        <h2 className="section-title">Installed Apps</h2>
-        <div className="app-launch-grid">
-          {visibleInstalledAppList.map(({ catalog }) => (
-            <button key={catalog.id} type="button" className="app-launch-tile" onClick={() => void openApp(catalog)}>
-              <span className="icon">{catalog.icon ?? "◻"}</span>
-              <span className="tile-caption">{catalog.title}</span>
+        <h2 className="section-title">Apps</h2>
+        {homeTabOptions.length > 1 ? (
+          <div className="home-tabs" role="tablist" aria-label="Home app groups">
+            {homeTabOptions.includes("favorites") ? (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={homeTab === "favorites"}
+                className={`home-tab${homeTab === "favorites" ? " is-active" : ""}`}
+                onClick={() => setHomeTab("favorites")}
+              >
+                Favorites ({favoriteVisibleInstalledAppList.length})
+              </button>
+            ) : null}
+            {homeTabOptions.includes("recent") ? (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={homeTab === "recent"}
+                className={`home-tab${homeTab === "recent" ? " is-active" : ""}`}
+                onClick={() => setHomeTab("recent")}
+              >
+                Recent
+              </button>
+            ) : null}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={homeTab === "all"}
+              className={`home-tab${homeTab === "all" ? " is-active" : ""}`}
+              onClick={() => setHomeTab("all")}
+            >
+              All
             </button>
+          </div>
+        ) : null}
+        <div className="app-launch-grid">
+          {homeActiveList.map(({ catalog }) => (
+            <article key={catalog.id} className="app-launch-item">
+              <button type="button" className="app-launch-tile" onClick={() => void openApp(catalog)}>
+                <span className="icon">{catalog.icon ?? "◻"}</span>
+                <span className="tile-caption">{catalog.title}</span>
+              </button>
+              <button
+                type="button"
+                className={`app-fav-toggle${favoriteAppIds.includes(catalog.id) ? " is-active" : ""}`}
+                aria-label={favoriteAppIds.includes(catalog.id) ? `Unfavorite ${catalog.title}` : `Favorite ${catalog.title}`}
+                onClick={() => toggleFavoriteApp(catalog.id)}
+              >
+                {favoriteAppIds.includes(catalog.id) ? "★" : "☆"}
+              </button>
+            </article>
           ))}
         </div>
-        {visibleInstalledAppList.length === 0 ? (
+        {homeActiveList.length === 0 ? (
           <p className="status-line">No visible installed apps. Unhide or install apps from Manage Apps.</p>
         ) : null}
       </section>

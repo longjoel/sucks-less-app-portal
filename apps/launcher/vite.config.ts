@@ -21,7 +21,11 @@ export default defineConfig(({ command }) => {
         "@slap/minesweeper": new URL("../minesweeper/src/index.tsx", import.meta.url).pathname,
         "@slap/ski-free": new URL("../ski-free/src/index.tsx", import.meta.url).pathname,
         "@slap/simon-says": new URL("../simon-says/src/index.tsx", import.meta.url).pathname,
-        "@slap/dice-roller": new URL("../dice-roller/src/index.tsx", import.meta.url).pathname
+        "@slap/dice-roller": new URL("../dice-roller/src/index.tsx", import.meta.url).pathname,
+        "@slap/compass": new URL("../compass/src/index.tsx", import.meta.url).pathname,
+        "@slap/countdown": new URL("../countdown/src/index.tsx", import.meta.url).pathname,
+        "@slap/stopwatch": new URL("../stopwatch/src/index.tsx", import.meta.url).pathname,
+        "@slap/minute-timer": new URL("../minute-timer/src/index.tsx", import.meta.url).pathname
       }
     },
     plugins: [
