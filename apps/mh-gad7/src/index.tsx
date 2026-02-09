@@ -26,8 +26,6 @@ type AssessmentDefinition = {
 };
 
 const STORAGE_PATH = "mh-gad7-results.json";
-const LEGACY_APP_ID = "mh-checkin";
-const LEGACY_STORAGE_PATH = "mh-checkin-results.json";
 const SCORE_OPTIONS = [0, 1, 2, 3] as const;
 const SCORE_LABELS = [
   "Not at all",
@@ -63,18 +61,6 @@ const Preview = (_props: Record<string, never>) => (
     <p>GAD-7 screening with history, trends, and export.</p>
   </article>
 );
-
-const readLegacyText = () => {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    return window.localStorage?.getItem(`slap:v1:${LEGACY_APP_ID}:${LEGACY_STORAGE_PATH}`) ?? null;
-  } catch {
-    return null;
-  }
-};
 
 const isScaleRecord = (value: unknown): value is ScaleAssessmentRecord => {
   if (typeof value !== "object" || value === null) {
@@ -162,26 +148,6 @@ const MhGad7App = ({ ctx }: { ctx: SlapApplicationContext }) => {
         return;
       }
 
-      const legacyRaw = readLegacyText();
-      if (!legacyRaw) {
-        return;
-      }
-
-      try {
-        const parsed = JSON.parse(legacyRaw) as unknown;
-        if (typeof parsed === "object" && parsed !== null) {
-          const candidate = parsed as { records?: unknown };
-          if (Array.isArray(candidate.records)) {
-            const migrated = candidate.records.filter(isScaleRecord);
-            if (migrated.length > 0) {
-              await persist(migrated);
-              setStatus(`Imported ${migrated.length} legacy entries.`);
-            }
-          }
-        }
-      } catch {
-        setStatus("Legacy data was unreadable.");
-      }
     })();
   }, [ctx.vfs]);
 

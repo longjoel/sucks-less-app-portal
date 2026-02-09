@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "dev": "npm run -w @slap/launcher dev",
-    "build": "npm run -w @slap/launcher build",
+    "build": "npm run -w @slap/launcher build && npm run build:standalone",
+    "build:standalone": "node scripts/build-standalone.mjs",
     "preview": "npm run -w @slap/launcher preview",
     "typecheck": "npm run --workspaces typecheck"
   }

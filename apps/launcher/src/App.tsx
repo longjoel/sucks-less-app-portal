@@ -9,6 +9,7 @@ type AppCatalogItem = {
   tags: string[];
   version: string;
   icon?: string;
+  standalonePath?: string;
   loadManifest: () => Promise<SlapApplicationManifest>;
 };
 
@@ -54,7 +55,9 @@ const APP_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const ROOT_GUARD_BASE = "slap-root-base";
 const ROOT_GUARD_ACTIVE = "slap-root-active";
 
-const appCatalog: AppCatalogItem[] = [
+const standalonePathFor = (appId: string) => `${APP_BASE}/apps/${encodeURIComponent(appId)}/`;
+
+const rawAppCatalog: AppCatalogItem[] = [
   {
     id: "calculator",
     title: "Calculator",
@@ -257,6 +260,7 @@ const appCatalog: AppCatalogItem[] = [
   }
 ];
 
+const appCatalog = rawAppCatalog.map((app) => ({ ...app, standalonePath: standalonePathFor(app.id) }));
 const appCatalogById = new Map(appCatalog.map((app) => [app.id, app]));
 
 const parseVersion = (value: string) =>
@@ -859,6 +863,10 @@ export const App = () => {
       }));
 
       setUpdateMessage(`Installed ${app.title} v${app.version}.`);
+
+      if (import.meta.env.PROD && app.standalonePath) {
+        window.location.assign(app.standalonePath);
+      }
     } catch (error) {
       setLauncherError(error instanceof Error ? error.message : "Unable to install app.");
     }
@@ -920,6 +928,11 @@ export const App = () => {
 
   const openApp = (app: AppCatalogItem) => {
     trackRecentApp(app.id);
+    if (import.meta.env.PROD && app.standalonePath) {
+      window.location.assign(app.standalonePath);
+      return;
+    }
+
     navigateToRoute({ kind: "app", appId: app.id });
   };
 
