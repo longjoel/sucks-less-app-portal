@@ -27,7 +27,11 @@ export default defineConfig(({ command }) => {
         "@slap/compass": new URL("../compass/src/index.tsx", import.meta.url).pathname,
         "@slap/countdown": new URL("../countdown/src/index.tsx", import.meta.url).pathname,
         "@slap/stopwatch": new URL("../stopwatch/src/index.tsx", import.meta.url).pathname,
-        "@slap/minute-timer": new URL("../minute-timer/src/index.tsx", import.meta.url).pathname
+        "@slap/minute-timer": new URL("../minute-timer/src/index.tsx", import.meta.url).pathname,
+        "@slap/mastermind": new URL("../mastermind/src/index.tsx", import.meta.url).pathname,
+        "@slap/sudoku": new URL("../sudoku/src/index.tsx", import.meta.url).pathname,
+        "@slap/fireplace": new URL("../fireplace/src/index.tsx", import.meta.url).pathname,
+        "@slap/aquarium": new URL("../aquarium/src/index.tsx", import.meta.url).pathname
       }
     },
     plugins: [

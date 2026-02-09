@@ -136,6 +136,46 @@ const appCatalog: AppCatalogItem[] = [
     loadManifest: async () => (await import("@slap/game-2048")).game2048Manifest
   },
   {
+    id: "mastermind",
+    title: "Mastermind",
+    author: "Joel",
+    description: "Crack the secret color code with feedback pegs.",
+    tags: ["game", "puzzle", "logic"],
+    version: "1.0.0",
+    icon: "🧩",
+    loadManifest: async () => (await import("@slap/mastermind")).mastermindManifest
+  },
+  {
+    id: "sudoku",
+    title: "Sudoku",
+    author: "Joel",
+    description: "Generate easy, medium, or hard Sudoku puzzles.",
+    tags: ["game", "puzzle", "logic", "numbers"],
+    version: "1.0.0",
+    icon: "🔣",
+    loadManifest: async () => (await import("@slap/sudoku")).sudokuManifest
+  },
+  {
+    id: "fireplace",
+    title: "Fireplace",
+    author: "Joel",
+    description: "Cozy particle fire with motion and sound response.",
+    tags: ["ambient", "relax", "simulation"],
+    version: "1.0.0",
+    icon: "🔥",
+    loadManifest: async () => (await import("@slap/fireplace")).fireplaceManifest
+  },
+  {
+    id: "aquarium",
+    title: "Aquarium",
+    author: "Joel",
+    description: "Relaxing fish tank you can feed and poke.",
+    tags: ["ambient", "playset", "simulation"],
+    version: "1.0.0",
+    icon: "🐟",
+    loadManifest: async () => (await import("@slap/aquarium")).aquariumManifest
+  },
+  {
     id: "minesweeper",
     title: "Minesweeper",
     author: "Joel",
