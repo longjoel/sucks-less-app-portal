@@ -9,6 +9,7 @@ type AppCatalogItem = {
   tags: string[];
   version: string;
   icon?: string;
+  standalonePath?: string;
   loadManifest: () => Promise<SlapApplicationManifest>;
 };
 
@@ -54,7 +55,9 @@ const APP_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const ROOT_GUARD_BASE = "slap-root-base";
 const ROOT_GUARD_ACTIVE = "slap-root-active";
 
-const appCatalog: AppCatalogItem[] = [
+const standalonePathFor = (appId: string) => `${APP_BASE}/apps/${encodeURIComponent(appId)}/`;
+
+const rawAppCatalog: AppCatalogItem[] = [
   {
     id: "calculator",
     title: "Calculator",
@@ -134,6 +137,46 @@ const appCatalog: AppCatalogItem[] = [
     version: "1.0.0",
     icon: "🔢",
     loadManifest: async () => (await import("@slap/game-2048")).game2048Manifest
+  },
+  {
+    id: "mastermind",
+    title: "Mastermind",
+    author: "Joel",
+    description: "Crack the secret color code with feedback pegs.",
+    tags: ["game", "puzzle", "logic"],
+    version: "1.0.0",
+    icon: "🧩",
+    loadManifest: async () => (await import("@slap/mastermind")).mastermindManifest
+  },
+  {
+    id: "sudoku",
+    title: "Sudoku",
+    author: "Joel",
+    description: "Generate easy, medium, or hard Sudoku puzzles.",
+    tags: ["game", "puzzle", "logic", "numbers"],
+    version: "1.0.0",
+    icon: "🔣",
+    loadManifest: async () => (await import("@slap/sudoku")).sudokuManifest
+  },
+  {
+    id: "fireplace",
+    title: "Fireplace",
+    author: "Joel",
+    description: "Cozy particle fire with motion and sound response.",
+    tags: ["ambient", "relax", "simulation"],
+    version: "1.0.0",
+    icon: "🔥",
+    loadManifest: async () => (await import("@slap/fireplace")).fireplaceManifest
+  },
+  {
+    id: "aquarium",
+    title: "Aquarium",
+    author: "Joel",
+    description: "Relaxing fish tank you can feed and poke.",
+    tags: ["ambient", "playset", "simulation"],
+    version: "1.0.0",
+    icon: "🐟",
+    loadManifest: async () => (await import("@slap/aquarium")).aquariumManifest
   },
   {
     id: "minesweeper",
@@ -217,6 +260,7 @@ const appCatalog: AppCatalogItem[] = [
   }
 ];
 
+const appCatalog = rawAppCatalog.map((app) => ({ ...app, standalonePath: standalonePathFor(app.id) }));
 const appCatalogById = new Map(appCatalog.map((app) => [app.id, app]));
 
 const parseVersion = (value: string) =>
@@ -819,6 +863,10 @@ export const App = () => {
       }));
 
       setUpdateMessage(`Installed ${app.title} v${app.version}.`);
+
+      if (import.meta.env.PROD && app.standalonePath) {
+        window.location.assign(app.standalonePath);
+      }
     } catch (error) {
       setLauncherError(error instanceof Error ? error.message : "Unable to install app.");
     }
@@ -880,6 +928,11 @@ export const App = () => {
 
   const openApp = (app: AppCatalogItem) => {
     trackRecentApp(app.id);
+    if (import.meta.env.PROD && app.standalonePath) {
+      window.location.assign(app.standalonePath);
+      return;
+    }
+
     navigateToRoute({ kind: "app", appId: app.id });
   };
 
