@@ -6,6 +6,7 @@ type AppCatalogItem = {
   title: string;
   author: string;
   description: string;
+  tags: string[];
   version: string;
   icon?: string;
   loadManifest: () => Promise<SlapApplicationManifest>;
@@ -57,6 +58,7 @@ const appCatalog: AppCatalogItem[] = [
     title: "Calculator",
     author: "Joel",
     description: "A tiny offline-first calculator.",
+    tags: ["utility", "math", "quick-tools"],
     version: "1.0.0",
     icon: "🧮",
     loadManifest: async () => (await import("@slap/calculator")).calculatorManifest
@@ -66,6 +68,7 @@ const appCatalog: AppCatalogItem[] = [
     title: "Journal",
     author: "Joel",
     description: "Mood-aware journal with optional prompts.",
+    tags: ["writing", "reflection", "mental-health"],
     version: "1.0.0",
     icon: "📓",
     loadManifest: async () => (await import("@slap/journal")).journalManifest
@@ -75,6 +78,7 @@ const appCatalog: AppCatalogItem[] = [
     title: "MH Checkin",
     author: "Joel",
     description: "Take PHQ-9 or GAD-7, track trends, export results.",
+    tags: ["mental-health", "assessment", "tracking"],
     version: "1.0.0",
     icon: "🧠",
     loadManifest: async () => (await import("@slap/mh-checkin")).mhCheckinManifest
@@ -84,6 +88,7 @@ const appCatalog: AppCatalogItem[] = [
     title: "Box Breathing",
     author: "Joel",
     description: "Canvas-guided inhale/hold/exhale/hold breathing.",
+    tags: ["wellness", "breathing", "timer"],
     version: "1.0.0",
     icon: "🫁",
     loadManifest: async () => (await import("@slap/box-breathing")).boxBreathingManifest
@@ -93,6 +98,7 @@ const appCatalog: AppCatalogItem[] = [
     title: "Daily Checklist",
     author: "Joel",
     description: "Check off daily tasks and edit your reusable list.",
+    tags: ["productivity", "habits", "planning"],
     version: "1.0.0",
     icon: "✅",
     loadManifest: async () => (await import("@slap/daily-checklist")).dailyChecklistManifest
@@ -102,6 +108,7 @@ const appCatalog: AppCatalogItem[] = [
     title: "2048",
     author: "Joel",
     description: "Swipe and merge tiles to reach 2048.",
+    tags: ["game", "puzzle", "numbers"],
     version: "1.0.0",
     icon: "🔢",
     loadManifest: async () => (await import("@slap/game-2048")).game2048Manifest
@@ -111,6 +118,7 @@ const appCatalog: AppCatalogItem[] = [
     title: "Minesweeper",
     author: "Joel",
     description: "Reveal safe tiles and avoid mines.",
+    tags: ["game", "puzzle", "classic"],
     version: "1.0.0",
     icon: "💣",
     loadManifest: async () => (await import("@slap/minesweeper")).minesweeperManifest
@@ -120,6 +128,7 @@ const appCatalog: AppCatalogItem[] = [
     title: "Ski Free",
     author: "Joel",
     description: "Dodge obstacles and survive as long as possible.",
+    tags: ["game", "arcade", "reflex"],
     version: "1.0.0",
     icon: "🎿",
     loadManifest: async () => (await import("@slap/ski-free")).skiFreeManifest
@@ -129,9 +138,20 @@ const appCatalog: AppCatalogItem[] = [
     title: "Simon Says",
     author: "Joel",
     description: "Repeat the growing 4-region light pattern.",
+    tags: ["game", "memory", "reflex"],
     version: "1.0.0",
     icon: "🟩",
     loadManifest: async () => (await import("@slap/simon-says")).simonSaysManifest
+  },
+  {
+    id: "dice-roller",
+    title: "Dice Roller",
+    author: "Joel",
+    description: "Roll custom color-coded dice pools for tabletop sessions.",
+    tags: ["tabletop", "randomizer", "utility"],
+    version: "1.0.0",
+    icon: "🎲",
+    loadManifest: async () => (await import("@slap/dice-roller")).diceRollerManifest
   }
 ];
 
@@ -334,8 +354,9 @@ export const App = () => {
   const [hiddenAppIds, setHiddenAppIds] = useState<string[]>(getInitialHiddenAppIds);
   const [route, setRoute] = useState<RouteState>(routeFromLocation);
   const [activeManifest, setActiveManifest] = useState<SlapApplicationManifest | null>(null);
-  const [manageTab, setManageTab] = useState<"installed" | "available">("installed");
+  const [manageTab, setManageTab] = useState<"installed" | "available" | "all">("installed");
   const [manageFilter, setManageFilter] = useState("");
+  const [manageTagFilter, setManageTagFilter] = useState<string[]>([]);
   const [manageExpandedId, setManageExpandedId] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(isStandaloneDisplayMode);
   const [launcherError, setLauncherError] = useState<string | null>(null);
@@ -368,24 +389,38 @@ export const App = () => {
     () => appCatalog.filter((app) => !installedApps[app.id]),
     [installedApps]
   );
+  const allManageTags = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const app of appCatalog) {
+      for (const tag of app.tags) {
+        counts.set(tag, (counts.get(tag) ?? 0) + 1);
+      }
+    }
+    return [...counts.entries()]
+      .sort((a, b) => (b[1] === a[1] ? a[0].localeCompare(b[0]) : b[1] - a[1]))
+      .map(([tag]) => tag);
+  }, []);
   const normalizedManageFilter = manageFilter.trim().toLowerCase();
+  const selectedTagSet = useMemo(() => new Set(manageTagFilter), [manageTagFilter]);
+  const matchesManageFilters = (app: AppCatalogItem) => {
+    const matchesText =
+      !normalizedManageFilter ||
+      `${app.title} ${app.description} ${app.id} ${app.tags.join(" ")}`.toLowerCase().includes(normalizedManageFilter);
+    const matchesTags =
+      selectedTagSet.size === 0 || app.tags.some((tag) => selectedTagSet.has(tag));
+    return matchesText && matchesTags;
+  };
   const filteredInstalledAppList = useMemo(
-    () =>
-      installedAppList.filter(({ catalog }) => {
-        if (!normalizedManageFilter) return true;
-        const haystack = `${catalog.title} ${catalog.description} ${catalog.id}`.toLowerCase();
-        return haystack.includes(normalizedManageFilter);
-      }),
-    [installedAppList, normalizedManageFilter]
+    () => installedAppList.filter(({ catalog }) => matchesManageFilters(catalog)),
+    [installedAppList, normalizedManageFilter, selectedTagSet]
   );
   const filteredAvailableAppCatalog = useMemo(
-    () =>
-      availableAppCatalog.filter((app) => {
-        if (!normalizedManageFilter) return true;
-        const haystack = `${app.title} ${app.description} ${app.id}`.toLowerCase();
-        return haystack.includes(normalizedManageFilter);
-      }),
-    [availableAppCatalog, normalizedManageFilter]
+    () => availableAppCatalog.filter((app) => matchesManageFilters(app)),
+    [availableAppCatalog, normalizedManageFilter, selectedTagSet]
+  );
+  const filteredAllAppCatalog = useMemo(
+    () => appCatalog.filter((app) => matchesManageFilters(app)),
+    [normalizedManageFilter, selectedTagSet]
   );
 
   const activeCtx = useMemo(
@@ -754,6 +789,41 @@ export const App = () => {
           />
         </label>
 
+        <div className="manage-tag-cloud">
+          {allManageTags.map((tag) => {
+            const active = selectedTagSet.has(tag);
+            return (
+              <button
+                key={tag}
+                type="button"
+                className={`manage-tag-pill${active ? " is-active" : ""}`}
+                onClick={() => {
+                  setManageExpandedId(null);
+                  setManageTagFilter((current) =>
+                    current.includes(tag)
+                      ? current.filter((value) => value !== tag)
+                      : [...current, tag]
+                  );
+                }}
+              >
+                {tag}
+              </button>
+            );
+          })}
+          {manageTagFilter.length > 0 ? (
+            <button
+              type="button"
+              className="manage-tag-pill manage-tag-clear"
+              onClick={() => {
+                setManageTagFilter([]);
+                setManageExpandedId(null);
+              }}
+            >
+              clear tags
+            </button>
+          ) : null}
+        </div>
+
         <div className="manage-tabs" role="tablist" aria-label="Manage app lists">
           <button
             type="button"
@@ -778,6 +848,18 @@ export const App = () => {
             }}
           >
             Not Installed ({filteredAvailableAppCatalog.length})
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={manageTab === "all"}
+            className={`manage-tab${manageTab === "all" ? " is-active" : ""}`}
+            onClick={() => {
+              setManageTab("all");
+              setManageExpandedId(null);
+            }}
+          >
+            All Apps ({filteredAllAppCatalog.length})
           </button>
         </div>
 
@@ -810,6 +892,13 @@ export const App = () => {
                     </summary>
                     <div className="manage-app-body">
                       <span>{catalog.description}</span>
+                      <div className="manage-app-tags">
+                        {catalog.tags.map((tag) => (
+                          <span key={`${catalog.id}:${tag}`} className="manage-inline-tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                       <small>{isHidden ? "Hidden on main screen" : "Visible on main screen"}</small>
                       <div className="slap-button-row">
                         <SlapButton
@@ -834,40 +923,113 @@ export const App = () => {
               ) : null}
             </div>
           </section>
-        ) : (
+        ) : manageTab === "available" ? (
           <section>
             <h2 className="section-title">Not Installed Apps</h2>
             <div className="app-grid app-grid-compact">
               {filteredAvailableAppCatalog.map((app) => {
                 const itemId = `available:${app.id}`;
                 return (
-                <details key={app.id} className="manage-app-item" open={manageExpandedId === itemId}>
-                  <summary
-                    className="manage-app-summary"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      setManageExpandedId((current) => (current === itemId ? null : itemId));
-                    }}
-                  >
-                    <span className="icon">{app.icon ?? "◻"}</span>
-                    <span className="manage-app-copy">
-                      <strong>{app.title}</strong>
-                      <small>Latest v{app.version}</small>
-                    </span>
-                  </summary>
-                  <div className="manage-app-body">
-                    <span>{app.description}</span>
-                    <div className="slap-button-row">
-                      <SlapButton title="Install" onClick={() => void installApp(app)} />
+                  <details key={app.id} className="manage-app-item" open={manageExpandedId === itemId}>
+                    <summary
+                      className="manage-app-summary"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setManageExpandedId((current) => (current === itemId ? null : itemId));
+                      }}
+                    >
+                      <span className="icon">{app.icon ?? "◻"}</span>
+                      <span className="manage-app-copy">
+                        <strong>{app.title}</strong>
+                        <small>Latest v{app.version}</small>
+                      </span>
+                    </summary>
+                    <div className="manage-app-body">
+                      <span>{app.description}</span>
+                      <div className="manage-app-tags">
+                        {app.tags.map((tag) => (
+                          <span key={`${app.id}:${tag}`} className="manage-inline-tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="slap-button-row">
+                        <SlapButton title="Install" onClick={() => void installApp(app)} />
+                      </div>
                     </div>
-                  </div>
-                </details>
-              );
+                  </details>
+                );
               })}
               {filteredAvailableAppCatalog.length === 0 ? (
                 <p className="status-line">
                   {availableAppCatalog.length === 0 ? "All apps are installed." : "No apps match this filter."}
                 </p>
+              ) : null}
+            </div>
+          </section>
+        ) : (
+          <section>
+            <h2 className="section-title">All Apps</h2>
+            <div className="app-grid app-grid-compact">
+              {filteredAllAppCatalog.map((app) => {
+                const installedRecord = installedApps[app.id] ?? null;
+                const hasUpdate = installedRecord ? isVersionNewer(app.version, installedRecord.version) : false;
+                const isHidden = hiddenAppIds.includes(app.id);
+                const itemId = `all:${app.id}`;
+                return (
+                  <details key={app.id} className="manage-app-item" open={manageExpandedId === itemId}>
+                    <summary
+                      className="manage-app-summary"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setManageExpandedId((current) => (current === itemId ? null : itemId));
+                      }}
+                    >
+                      <span className="icon">{app.icon ?? "◻"}</span>
+                      <span className="manage-app-copy">
+                        <strong>{app.title}</strong>
+                        <small>
+                          {installedRecord ? `Installed v${installedRecord.version} | Latest v${app.version}` : `Not installed | Latest v${app.version}`}
+                          {hasUpdate ? " | Update available" : ""}
+                        </small>
+                      </span>
+                    </summary>
+                    <div className="manage-app-body">
+                      <span>{app.description}</span>
+                      <div className="manage-app-tags">
+                        {app.tags.map((tag) => (
+                          <span key={`${app.id}:${tag}`} className="manage-inline-tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      {installedRecord ? (
+                        <>
+                          <small>{isHidden ? "Hidden on main screen" : "Visible on main screen"}</small>
+                          <div className="slap-button-row">
+                            <SlapButton
+                              title={hasUpdate ? "Install Latest" : "Up To Date"}
+                              onClick={() => void updateApp(app, installedRecord.version)}
+                              disabled={!hasUpdate}
+                            />
+                            <SlapButton
+                              title={isHidden ? "Unhide" : "Hide"}
+                              onClick={() => toggleHiddenApp(app.id)}
+                            />
+                            <SlapButton title="Uninstall" onClick={() => uninstallApp(app.id)} />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="slap-button-row">
+                          <SlapButton title="Install" onClick={() => void installApp(app)} />
+                        </div>
+                      )}
+                    </div>
+                  </details>
+                );
+              })}
+              {filteredAllAppCatalog.length === 0 ? (
+                <p className="status-line">No apps match this filter.</p>
               ) : null}
             </div>
           </section>
