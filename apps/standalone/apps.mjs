@@ -158,5 +158,29 @@ export const apps = [
     title: "Aquarium",
     shortName: "Aquarium",
     description: "Relaxing fish tank you can feed and poke."
+  },
+  {
+    id: "zen-garden",
+    entry: "../../zen-garden/src/index.tsx",
+    exportName: "zenGardenManifest",
+    title: "Zen Garden",
+    shortName: "Zen Garden",
+    description: "Rake the sand, place stones, and reset when you need to breathe."
+  },
+  {
+    id: "whiteboard",
+    entry: "../../whiteboard/src/index.tsx",
+    exportName: "whiteboardManifest",
+    title: "Whiteboard",
+    shortName: "Whiteboard",
+    description: "Sketch ideas with a few markers, erase, and save to PNG."
+  },
+  {
+    id: "notes",
+    entry: "../../notes/src/index.tsx",
+    exportName: "notesManifest",
+    title: "Notes",
+    shortName: "Notes",
+    description: "Accordion notes you can update, append, clone, and delete."
   }
 ];

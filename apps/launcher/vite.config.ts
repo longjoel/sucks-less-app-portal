@@ -32,7 +32,10 @@ export default defineConfig(({ command }) => {
         "@slap/mastermind": new URL("../mastermind/src/index.tsx", import.meta.url).pathname,
         "@slap/sudoku": new URL("../sudoku/src/index.tsx", import.meta.url).pathname,
         "@slap/fireplace": new URL("../fireplace/src/index.tsx", import.meta.url).pathname,
-        "@slap/aquarium": new URL("../aquarium/src/index.tsx", import.meta.url).pathname
+        "@slap/aquarium": new URL("../aquarium/src/index.tsx", import.meta.url).pathname,
+        "@slap/zen-garden": new URL("../zen-garden/src/index.tsx", import.meta.url).pathname,
+        "@slap/whiteboard": new URL("../whiteboard/src/index.tsx", import.meta.url).pathname,
+        "@slap/notes": new URL("../notes/src/index.tsx", import.meta.url).pathname
       }
     },
     plugins: [

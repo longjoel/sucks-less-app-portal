@@ -210,6 +210,9 @@ importers:
       '@slap/minesweeper':
         specifier: workspace:*
         version: link:../minesweeper
+      '@slap/notes':
+        specifier: workspace:*
+        version: link:../notes
       '@slap/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
@@ -219,6 +222,12 @@ importers:
       '@slap/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@slap/whiteboard':
+        specifier: workspace:*
+        version: link:../whiteboard
+      '@slap/zen-garden':
+        specifier: workspace:*
+        version: link:../zen-garden
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -341,6 +350,22 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
+  apps/notes:
+    dependencies:
+      '@slap/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@slap/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   apps/simon-says:
     dependencies:
       '@slap/sdk':
@@ -373,6 +398,8 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
+  apps/standalone: {}
+
   apps/stopwatch:
     dependencies:
       '@slap/sdk':
@@ -390,6 +417,38 @@ importers:
         version: 5.9.3
 
   apps/sudoku:
+    dependencies:
+      '@slap/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@slap/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
+  apps/whiteboard:
+    dependencies:
+      '@slap/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@slap/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
+  apps/zen-garden:
     dependencies:
       '@slap/sdk':
         specifier: workspace:*

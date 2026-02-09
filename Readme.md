@@ -1,6 +1,8 @@
 # Suck Less App Portal
 ## S.L.A.P.
 
+![Deploy Pages](https://github.com/longjoel/sucks-less-app-portal/actions/workflows/deploy.yml/badge.svg)
+
 SLAP is a collection of offline-first progressive web apps that can be installed from a single launcher page.
 
 Design goals:
@@ -50,21 +52,18 @@ This repo uses `pnpm` workspaces and `turbo` for task orchestration:
 - `pnpm build` builds the launcher and all standalone app bundles
 - `pnpm typecheck` runs TypeScript checks across workspaces
 
-## GitHub Pages
+## GitHub Pages (CI Deploy)
 
-This repo is configured so the launcher build is emitted to `docs/`.
+The build outputs to `docs/`, but the folder is ignored in git. GitHub Pages is deployed via Actions.
 
-1. Run:
+1. Ensure GitHub Pages is set to **GitHub Actions** in repo settings.
+2. Push to `main` and the workflow will build + deploy.
+
+Optional helper:
 
 ```bash
-pnpm build
+pnpm deploy
 ```
-
-2. In GitHub repo settings, set Pages source to:
-- Branch: `main` (or your default branch)
-- Folder: `/docs`
-
-3. Commit and push `docs/` whenever you publish updates.
 
 ## App Model
 

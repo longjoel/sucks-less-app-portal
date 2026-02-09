@@ -11,6 +11,7 @@
     "dev": "turbo run dev --filter=@slap/launcher",
     "build": "turbo run build --filter=@slap/launcher && turbo run build:standalone",
     "build:standalone": "node scripts/build-standalone.mjs",
+    "deploy": "bash scripts/deploy.sh",
     "preview": "turbo run preview --filter=@slap/launcher",
     "typecheck": "turbo run typecheck"
   },

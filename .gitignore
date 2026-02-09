@@ -3,5 +3,6 @@ node_modules
 *.log
 coverage
 .turbo
+docs
 apps/*/dist
 packages/*/dist
