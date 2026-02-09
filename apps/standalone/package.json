@@ -1,0 +1,9 @@
+{
+  "name": "@slap/standalone-builder",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:standalone": "node ../../scripts/build-standalone.mjs"
+  }
+}

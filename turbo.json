@@ -14,7 +14,7 @@
       "outputs": ["dist/**", "../../docs/**"]
     },
     "build:standalone": {
-      "outputs": ["docs/apps/**"]
+      "outputs": ["../../docs/apps/**"]
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],
