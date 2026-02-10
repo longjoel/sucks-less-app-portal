@@ -100,6 +100,57 @@ body {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.app-groups {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.app-group {
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--panel);
+  padding: 0.35rem 0.45rem 0.5rem;
+}
+
+.app-group-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--ink);
+  padding: 0.35rem 0.15rem;
+  list-style: none;
+}
+
+.app-group-summary::-webkit-details-marker {
+  display: none;
+}
+
+.app-group-summary::after {
+  content: "▾";
+  color: var(--muted);
+  margin-left: 0.35rem;
+  transition: transform 0.2s ease;
+}
+
+.app-group[open] .app-group-summary::after {
+  transform: rotate(180deg);
+}
+
+.app-group-count {
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: #ece4d7;
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  margin-left: auto;
+}
+
+.app-group .app-launch-grid {
+  margin-top: 0.35rem;
+}
+
 .home-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

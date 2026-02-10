@@ -21,6 +21,7 @@ type InstalledAppRecord = {
 };
 
 type InstalledAppsState = Record<string, InstalledAppRecord>;
+type InstalledCatalogEntry = { record: InstalledAppRecord; catalog: AppCatalogItem };
 
 type Footprint = {
   localStorageBytes: number;
@@ -54,6 +55,26 @@ const RECENT_APPS_KEY = "slap:launcher:recent-apps";
 const APP_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const ROOT_GUARD_BASE = "slap-root-base";
 const ROOT_GUARD_ACTIVE = "slap-root-active";
+
+const PRIMARY_TAG_LABELS: Record<string, string> = {
+  game: "Games",
+  utility: "Utilities",
+  "mental-health": "Mental Health",
+  wellness: "Wellness",
+  productivity: "Productivity",
+  creative: "Creative",
+  audio: "Audio",
+  ambient: "Ambient",
+  tabletop: "Tabletop",
+  planning: "Planning"
+};
+
+const formatTagLabel = (tag: string) =>
+  PRIMARY_TAG_LABELS[tag] ??
+  tag
+    .split("-")
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
 
 const standalonePathFor = (appId: string) => `${APP_BASE}/apps/${encodeURIComponent(appId)}/`;
 
@@ -640,6 +661,27 @@ export const App = () => {
     if (homeTab === "recent") return recentVisibleInstalledAppList;
     return visibleInstalledAppList;
   }, [homeTab, favoriteVisibleInstalledAppList, recentVisibleInstalledAppList, visibleInstalledAppList]);
+  const groupedHomeApps = useMemo(() => {
+    const groups = new Map<string, { key: string; label: string; entries: InstalledCatalogEntry[] }>();
+
+    for (const entry of homeActiveList) {
+      const primaryTag = entry.catalog.tags[0] ?? "other";
+      const label = formatTagLabel(primaryTag);
+      const existing = groups.get(primaryTag);
+      if (existing) {
+        existing.entries.push(entry);
+      } else {
+        groups.set(primaryTag, { key: primaryTag, label, entries: [entry] });
+      }
+    }
+
+    const sorted = Array.from(groups.values());
+    for (const group of sorted) {
+      group.entries.sort((a, b) => a.catalog.title.localeCompare(b.catalog.title));
+    }
+    sorted.sort((a, b) => a.label.localeCompare(b.label));
+    return sorted;
+  }, [homeActiveList]);
 
   const availableAppCatalog = useMemo(
     () => appCatalog.filter((app) => !installedApps[app.id]),
@@ -1202,38 +1244,71 @@ export const App = () => {
             </button>
           </div>
         ) : null}
-        <div className="app-launch-grid">
-          {homeActiveList.map(({ catalog }) => (
-            <article key={catalog.id} className="app-launch-item">
-              <button type="button" className="app-launch-tile" onClick={() => void openApp(catalog)}>
-                <span className="icon">{catalog.icon ?? "◻"}</span>
-                <span className="tile-caption">{catalog.title}</span>
-              </button>
-              {homeTab === "all" && cleanupMode ? (
+        {homeTab === "all" ? (
+          <div className="app-groups">
+            {groupedHomeApps.map((group, index) => (
+              <details key={group.key} className="app-group" defaultOpen={index === 0}>
+                <summary className="app-group-summary">
+                  <span>{group.label}</span>
+                  <span className="app-group-count">{group.entries.length}</span>
+                </summary>
+                <div className="app-launch-grid">
+                  {group.entries.map(({ catalog }) => (
+                    <article key={catalog.id} className="app-launch-item">
+                      <button type="button" className="app-launch-tile" onClick={() => void openApp(catalog)}>
+                        <span className="icon">{catalog.icon ?? "◻"}</span>
+                        <span className="tile-caption">{catalog.title}</span>
+                      </button>
+                      {cleanupMode ? (
+                        <button
+                          type="button"
+                          className="app-remove-badge"
+                          aria-label={`Remove ${catalog.title}`}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            uninstallApp(catalog.id);
+                          }}
+                        >
+                          ×
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className={`app-fav-toggle${favoriteAppIds.includes(catalog.id) ? " is-active" : ""}`}
+                        aria-label={
+                          favoriteAppIds.includes(catalog.id) ? `Unfavorite ${catalog.title}` : `Favorite ${catalog.title}`
+                        }
+                        onClick={() => toggleFavoriteApp(catalog.id)}
+                      >
+                        {favoriteAppIds.includes(catalog.id) ? "★" : "☆"}
+                      </button>
+                    </article>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </div>
+        ) : (
+          <div className="app-launch-grid">
+            {homeActiveList.map(({ catalog }) => (
+              <article key={catalog.id} className="app-launch-item">
+                <button type="button" className="app-launch-tile" onClick={() => void openApp(catalog)}>
+                  <span className="icon">{catalog.icon ?? "◻"}</span>
+                  <span className="tile-caption">{catalog.title}</span>
+                </button>
                 <button
                   type="button"
-                  className="app-remove-badge"
-                  aria-label={`Remove ${catalog.title}`}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    uninstallApp(catalog.id);
-                  }}
+                  className={`app-fav-toggle${favoriteAppIds.includes(catalog.id) ? " is-active" : ""}`}
+                  aria-label={favoriteAppIds.includes(catalog.id) ? `Unfavorite ${catalog.title}` : `Favorite ${catalog.title}`}
+                  onClick={() => toggleFavoriteApp(catalog.id)}
                 >
-                  ×
+                  {favoriteAppIds.includes(catalog.id) ? "★" : "☆"}
                 </button>
-              ) : null}
-              <button
-                type="button"
-                className={`app-fav-toggle${favoriteAppIds.includes(catalog.id) ? " is-active" : ""}`}
-                aria-label={favoriteAppIds.includes(catalog.id) ? `Unfavorite ${catalog.title}` : `Favorite ${catalog.title}`}
-                onClick={() => toggleFavoriteApp(catalog.id)}
-              >
-                {favoriteAppIds.includes(catalog.id) ? "★" : "☆"}
-              </button>
-            </article>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+        )}
         {homeActiveList.length === 0 ? (
           <p className="status-line">No visible installed apps. Unhide or install apps from Manage Apps.</p>
         ) : null}
