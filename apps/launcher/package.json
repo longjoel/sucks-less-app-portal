@@ -19,6 +19,7 @@
     "@slap/game-2048": "workspace:*",
     "@slap/game-of-life": "workspace:*",
     "@slap/lights-out": "workspace:*",
+    "@slap/nonogram": "workspace:*",
     "@slap/maze-game": "workspace:*",
     "@slap/journal": "workspace:*",
     "@slap/mh-abc": "workspace:*",

@@ -200,6 +200,16 @@ const rawAppCatalog: AppCatalogItem[] = [
     loadManifest: async () => (await import("@slap/lights-out")).lightsOutManifest
   },
   {
+    id: "nonogram",
+    title: "Nonogram",
+    author: "Joel",
+    description: "Solve picture logic puzzles by matching row and column clues.",
+    tags: ["game", "puzzle", "logic"],
+    version: "1.0.0",
+    icon: "🧩",
+    loadManifest: async () => (await import("@slap/nonogram")).nonogramManifest
+  },
+  {
     id: "maze-game",
     title: "Emoji Maze",
     author: "Joel",

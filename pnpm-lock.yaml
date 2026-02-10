@@ -304,6 +304,9 @@ importers:
       '@slap/minesweeper':
         specifier: workspace:*
         version: link:../minesweeper
+      '@slap/nonogram':
+        specifier: workspace:*
+        version: link:../nonogram
       '@slap/notes':
         specifier: workspace:*
         version: link:../notes
@@ -461,6 +464,22 @@ importers:
         version: 5.9.3
 
   apps/minute-timer:
+    dependencies:
+      '@slap/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@slap/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
+  apps/nonogram:
     dependencies:
       '@slap/sdk':
         specifier: workspace:*

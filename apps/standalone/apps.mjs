@@ -96,6 +96,14 @@ export const apps = [
     description: "Toggle tiles to switch off every light."
   },
   {
+    id: "nonogram",
+    entry: "../../nonogram/src/index.tsx",
+    exportName: "nonogramManifest",
+    title: "Nonogram",
+    shortName: "Nonogram",
+    description: "Solve picture logic puzzles by matching row and column clues."
+  },
+  {
     id: "maze-game",
     entry: "../../maze-game/src/index.tsx",
     exportName: "mazeGameManifest",
