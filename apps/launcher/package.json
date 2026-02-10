@@ -15,6 +15,7 @@
     "@slap/calendar": "workspace:*",
     "@slap/calculator": "workspace:*",
     "@slap/daily-checklist": "workspace:*",
+    "@slap/emoji-comic-maker": "workspace:*",
     "@slap/game-2048": "workspace:*",
     "@slap/maze-game": "workspace:*",
     "@slap/journal": "workspace:*",

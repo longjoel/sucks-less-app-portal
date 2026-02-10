@@ -56,6 +56,14 @@ export const apps = [
     description: "Check off daily tasks and edit your reusable list."
   },
   {
+    id: "emoji-comic-maker",
+    entry: "../../emoji-comic-maker/src/index.tsx",
+    exportName: "emojiComicMakerManifest",
+    title: "Emoji Comic Maker",
+    shortName: "Comic",
+    description: "Build multi-page emoji comics with speech balloons and export to PNG or PDF."
+  },
+  {
     id: "audio-recorder",
     entry: "../../audio-recorder/src/index.tsx",
     exportName: "audioRecorderManifest",

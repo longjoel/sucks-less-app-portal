@@ -129,6 +129,16 @@ const rawAppCatalog: AppCatalogItem[] = [
     loadManifest: async () => (await import("@slap/daily-checklist")).dailyChecklistManifest
   },
   {
+    id: "emoji-comic-maker",
+    title: "Emoji Comic Maker",
+    author: "Joel",
+    description: "Build multi-page emoji comics with speech balloons and export to PNG or PDF.",
+    tags: ["creative", "story", "comic"],
+    version: "1.0.0",
+    icon: "💬",
+    loadManifest: async () => (await import("@slap/emoji-comic-maker")).emojiComicMakerManifest
+  },
+  {
     id: "audio-recorder",
     title: "Audio Recorder",
     author: "Joel",

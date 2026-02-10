@@ -15,6 +15,7 @@
       "@slap/audio-recorder": ["apps/audio-recorder/src/index.tsx"],
       "@slap/maze-game": ["apps/maze-game/src/index.tsx"],
       "@slap/calendar": ["apps/calendar/src/index.tsx"],
+      "@slap/emoji-comic-maker": ["apps/emoji-comic-maker/src/index.tsx"],
       "@slap/minesweeper": ["apps/minesweeper/src/index.tsx"],
       "@slap/compass": ["apps/compass/src/index.tsx"],
       "@slap/countdown": ["apps/countdown/src/index.tsx"],
