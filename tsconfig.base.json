@@ -12,6 +12,7 @@
       "@slap/box-breathing": ["apps/box-breathing/src/index.tsx"],
       "@slap/daily-checklist": ["apps/daily-checklist/src/index.tsx"],
       "@slap/game-2048": ["apps/game-2048/src/index.tsx"],
+      "@slap/maze-game": ["apps/maze-game/src/index.tsx"],
       "@slap/minesweeper": ["apps/minesweeper/src/index.tsx"],
       "@slap/compass": ["apps/compass/src/index.tsx"],
       "@slap/countdown": ["apps/countdown/src/index.tsx"],

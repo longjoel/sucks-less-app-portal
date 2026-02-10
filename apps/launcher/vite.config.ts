@@ -58,8 +58,8 @@ export default defineConfig(({ command }) => {
         ],
         manifest: {
           id: appBase,
-          name: "Suck Less App Portal",
-          short_name: "SLAP",
+          name: "sucks-less app portal",
+          short_name: "sucks-less",
           description: "Offline-first launcher for small local apps.",
           theme_color: "#2d4030",
           background_color: "#f4f0e8",

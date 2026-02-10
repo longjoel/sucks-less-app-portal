@@ -139,6 +139,16 @@ const rawAppCatalog: AppCatalogItem[] = [
     loadManifest: async () => (await import("@slap/game-2048")).game2048Manifest
   },
   {
+    id: "maze-game",
+    title: "Emoji Maze",
+    author: "Joel",
+    description: "Find the exit in a dynamically generated emoji maze.",
+    tags: ["game", "maze", "arcade"],
+    version: "1.0.0",
+    icon: "🧩",
+    loadManifest: async () => (await import("@slap/maze-game")).mazeGameManifest
+  },
+  {
     id: "mastermind",
     title: "Mastermind",
     author: "Joel",
@@ -859,8 +869,8 @@ export const App = () => {
     try {
       const url = window.location.href || "https://longjoel.github.io/sucks-less-app-portal/";
       const shareData = {
-        title: "SLAP",
-        text: "Suck Less App Portal",
+        title: "sucks-less",
+        text: "sucks-less app portal",
         url
       };
 
@@ -1101,7 +1111,7 @@ export const App = () => {
   return (
     <main className="page">
       <header className="header">
-        <h1>SLAP</h1>
+        <h1>sucks-less</h1>
         <p>Installable offline-first app portal.</p>
       </header>
 
@@ -1216,7 +1226,7 @@ export const App = () => {
           Hidden apps: <strong>{hiddenAppIds.length}</strong>
         </p>
         <p className="status-line">
-          SLAP app data footprint: <strong>{formatBytes(footprint.appDataBytes)}</strong>
+          sucks-less app data footprint: <strong>{formatBytes(footprint.appDataBytes)}</strong>
         </p>
         <p className="status-line">
           Total origin usage: <strong>{formatBytes(footprint.usedBytes)}</strong>

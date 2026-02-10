@@ -14,6 +14,7 @@
     "@slap/calculator": "workspace:*",
     "@slap/daily-checklist": "workspace:*",
     "@slap/game-2048": "workspace:*",
+    "@slap/maze-game": "workspace:*",
     "@slap/journal": "workspace:*",
     "@slap/mh-abc": "workspace:*",
     "@slap/mh-gad7": "workspace:*",

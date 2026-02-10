@@ -1,9 +1,8 @@
-# Suck Less App Portal
-## S.L.A.P.
+# sucks-less app portal
 
 ![Deploy Pages](https://github.com/longjoel/sucks-less-app-portal/actions/workflows/deploy.yml/badge.svg)
 
-SLAP is a collection of offline-first progressive web apps that can be installed from a single launcher page.
+sucks-less is a collection of offline-first progressive web apps that can be installed from a single launcher page.
 
 Design goals:
 - No telemetry
@@ -13,10 +12,10 @@ Design goals:
 
 ## Project Layout
 
-- `apps/launcher`: PWA launcher shell that lists and opens SLAP apps
-- `apps/calculator`: example SLAP app manifest + app component
+- `apps/launcher`: PWA launcher shell that lists and opens sucks-less apps
+- `apps/calculator`: example sucks-less app manifest + app component
 - `packages/sdk`: shared app contracts (`SlapApplicationContext`, VFS, manifest)
-- `packages/ui`: reusable SLAP UI components
+- `packages/ui`: reusable sucks-less UI components
 - `docs/`: static build output for GitHub Pages
 
 ## Getting Started

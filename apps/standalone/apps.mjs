@@ -64,6 +64,14 @@ export const apps = [
     description: "Swipe and merge tiles to reach 2048."
   },
   {
+    id: "maze-game",
+    entry: "../../maze-game/src/index.tsx",
+    exportName: "mazeGameManifest",
+    title: "Emoji Maze",
+    shortName: "Maze",
+    description: "Find the exit in a dynamically generated emoji maze."
+  },
+  {
     id: "minesweeper",
     entry: "../../minesweeper/src/index.tsx",
     exportName: "minesweeperManifest",

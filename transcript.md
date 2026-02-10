@@ -1,7 +1,7 @@
 # Building A Dice Roller Mini App (Tutorial Transcript)
 
 ## Intro
-Hey everyone, in this walkthrough we are adding a brand new **Dice Roller** mini applet to the SLAP portal.
+Hey everyone, in this walkthrough we are adding a brand new **Dice Roller** mini applet to the sucks-less portal.
 
 Goal:
 - Support multiple dice pools in one roll (example: `3d6 red` + `2d8 blue`)

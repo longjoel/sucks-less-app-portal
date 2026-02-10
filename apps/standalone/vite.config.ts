@@ -6,10 +6,10 @@ import path from "node:path";
 const resolvePath = (relativePath: string) => path.resolve(__dirname, relativePath);
 
 export default defineConfig(({ command }) => {
-  const appId = process.env.APP_ID ?? "slap-app";
+  const appId = process.env.APP_ID ?? "sucks-less-app";
   const appEntry = process.env.APP_ENTRY ?? "";
   const appExport = process.env.APP_EXPORT ?? "";
-  const appTitle = process.env.APP_TITLE ?? "SLAP App";
+  const appTitle = process.env.APP_TITLE ?? "sucks-less app";
   const appShort = process.env.APP_SHORT ?? appTitle;
   const appDescription = process.env.APP_DESCRIPTION ?? "";
 
