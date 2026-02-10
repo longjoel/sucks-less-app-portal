@@ -31,7 +31,8 @@
       "@slap/ar-garden": ["apps/ar-garden/src/index.tsx"],
       "@slap/zen-garden": ["apps/zen-garden/src/index.tsx"],
       "@slap/whiteboard": ["apps/whiteboard/src/index.tsx"],
-      "@slap/notes": ["apps/notes/src/index.tsx"]
+      "@slap/notes": ["apps/notes/src/index.tsx"],
+      "@slap/mood-tracker": ["apps/mood-tracker/src/index.tsx"]
     },
     "target": "ES2020",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],

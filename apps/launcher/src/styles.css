@@ -2092,3 +2092,116 @@ body {
 .dice-neutral {
   border-left: 4px solid #6a635a;
 }
+
+.mood-tracker-form {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0.8rem 0 1rem;
+}
+
+.mood-axis {
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--panel);
+  padding: 0.6rem 0.75rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.mood-axis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.mood-axis-value {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.mood-axis-scale {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.mood-axis-scale input[type="range"] {
+  width: 100%;
+}
+
+.mood-note {
+  margin-top: 0.25rem;
+}
+
+.mood-entry-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.mood-entry {
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--panel);
+  padding: 0.6rem 0.75rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.mood-entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.mood-entry-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.mood-mini-button {
+  border: 1px solid var(--border);
+  background: #f7f2e8;
+  border-radius: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.mood-mini-button:active {
+  transform: translateY(1px);
+}
+
+.mood-entry-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.mood-chip {
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.72rem;
+  border: 1px solid rgba(45, 64, 48, 0.2);
+  background: rgba(45, 64, 48, 0.08);
+  color: var(--accent);
+}
+
+.mood-entry-note {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.mood-entry-note.is-empty {
+  color: var(--muted);
+  font-style: italic;
+}

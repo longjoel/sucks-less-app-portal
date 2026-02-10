@@ -16,6 +16,14 @@ export const apps = [
     description: "Mood-aware journal with optional prompts."
   },
   {
+    id: "mood-tracker",
+    entry: "../../mood-tracker/src/index.tsx",
+    exportName: "moodTrackerManifest",
+    title: "Mood Tracker",
+    shortName: "Mood",
+    description: "Track your mood across calm/anxious, happy/sad, and energy levels."
+  },
+  {
     id: "mh-phq9",
     entry: "../../mh-phq9/src/index.tsx",
     exportName: "mhPhq9Manifest",

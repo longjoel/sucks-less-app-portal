@@ -34,6 +34,7 @@
     "@slap/zen-garden": "workspace:*",
     "@slap/whiteboard": "workspace:*",
     "@slap/notes": "workspace:*",
+    "@slap/mood-tracker": "workspace:*",
     "@slap/minesweeper": "workspace:*",
     "@slap/sdk": "workspace:*",
     "@slap/ui": "workspace:*",

@@ -130,6 +130,16 @@ const rawAppCatalog: AppCatalogItem[] = [
     loadManifest: async () => (await import("@slap/mh-abc")).mhAbcManifest
   },
   {
+    id: "mood-tracker",
+    title: "Mood Tracker",
+    author: "Joel",
+    description: "Track your mood across calm/anxious, happy/sad, and energy levels.",
+    tags: ["wellness", "mood", "journal"],
+    version: "1.0.0",
+    icon: "😊",
+    loadManifest: async () => (await import("@slap/mood-tracker")).moodTrackerManifest
+  },
+  {
     id: "box-breathing",
     title: "Box Breathing",
     author: "Joel",
