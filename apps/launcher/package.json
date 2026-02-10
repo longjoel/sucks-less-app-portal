@@ -17,6 +17,8 @@
     "@slap/daily-checklist": "workspace:*",
     "@slap/emoji-comic-maker": "workspace:*",
     "@slap/game-2048": "workspace:*",
+    "@slap/game-of-life": "workspace:*",
+    "@slap/lights-out": "workspace:*",
     "@slap/maze-game": "workspace:*",
     "@slap/journal": "workspace:*",
     "@slap/mh-abc": "workspace:*",

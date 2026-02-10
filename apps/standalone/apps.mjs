@@ -80,6 +80,22 @@ export const apps = [
     description: "Swipe and merge tiles to reach 2048."
   },
   {
+    id: "game-of-life",
+    entry: "../../game-of-life/src/index.tsx",
+    exportName: "gameOfLifeManifest",
+    title: "Game of Life",
+    shortName: "Life",
+    description: "Conway's Game of Life simulator with speed controls."
+  },
+  {
+    id: "lights-out",
+    entry: "../../lights-out/src/index.tsx",
+    exportName: "lightsOutManifest",
+    title: "Lights Out",
+    shortName: "Lights",
+    description: "Toggle tiles to switch off every light."
+  },
+  {
     id: "maze-game",
     entry: "../../maze-game/src/index.tsx",
     exportName: "mazeGameManifest",

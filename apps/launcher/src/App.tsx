@@ -159,6 +159,26 @@ const rawAppCatalog: AppCatalogItem[] = [
     loadManifest: async () => (await import("@slap/game-2048")).game2048Manifest
   },
   {
+    id: "game-of-life",
+    title: "Game of Life",
+    author: "Joel",
+    description: "Conway's Game of Life simulator with speed controls.",
+    tags: ["game", "simulation", "logic"],
+    version: "1.0.0",
+    icon: "🧬",
+    loadManifest: async () => (await import("@slap/game-of-life")).gameOfLifeManifest
+  },
+  {
+    id: "lights-out",
+    title: "Lights Out",
+    author: "Joel",
+    description: "Toggle tiles to switch off every light.",
+    tags: ["game", "puzzle", "logic"],
+    version: "1.0.0",
+    icon: "💡",
+    loadManifest: async () => (await import("@slap/lights-out")).lightsOutManifest
+  },
+  {
     id: "maze-game",
     title: "Emoji Maze",
     author: "Joel",

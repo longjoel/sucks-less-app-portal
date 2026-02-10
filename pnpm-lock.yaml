@@ -216,6 +216,22 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
+  apps/game-of-life:
+    dependencies:
+      '@slap/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@slap/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   apps/journal:
     dependencies:
       '@slap/sdk':
@@ -261,9 +277,15 @@ importers:
       '@slap/game-2048':
         specifier: workspace:*
         version: link:../game-2048
+      '@slap/game-of-life':
+        specifier: workspace:*
+        version: link:../game-of-life
       '@slap/journal':
         specifier: workspace:*
         version: link:../journal
+      '@slap/lights-out':
+        specifier: workspace:*
+        version: link:../lights-out
       '@slap/mastermind':
         specifier: workspace:*
         version: link:../mastermind
@@ -325,6 +347,22 @@ importers:
       vite-plugin-pwa:
         specifier: ^0.20.5
         version: 0.20.5(vite@5.4.21(terser@5.46.0))(workbox-build@7.4.0(@types/babel__core@7.20.5))(workbox-window@7.4.0)
+
+  apps/lights-out:
+    dependencies:
+      '@slap/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@slap/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
 
   apps/mastermind:
     dependencies:
