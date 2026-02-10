@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SlapApplicationManifest } from "@slap/sdk";
-import { SlapActionButton, SlapApplicationShell, SlapInlineText } from "@slap/ui";
+import { SlapActionButton, SlapApplicationShell, SlapInlineText, SlapGamepad } from "@slap/ui";
 
 type Cell = "wall" | "floor";
 type GameStatus = "playing" | "won" | "lost";
@@ -37,7 +37,6 @@ const MAX_SIZE = 41;
 const LEVEL_ADVANCE_MS = 900;
 const VIEW_ROWS = 13;
 const VIEW_COLS = 13;
-const CONTROL_SIZE = 44;
 const ROOM_ATTEMPTS = 8;
 const ROOM_MIN_SIZE = 3;
 const ROOM_MAX_SIZE = 7;
@@ -452,19 +451,6 @@ const advanceMonsters = (state: GameState): GameState => {
 const EmojiMazeApp = () => {
   const [game, setGame] = useState<GameState>(() => createGame(1));
 
-  const controlButtonStyle = {
-    width: `${CONTROL_SIZE}px`,
-    height: `${CONTROL_SIZE}px`,
-    border: "1px solid rgba(35, 49, 38, 0.45)",
-    borderRadius: "10px",
-    background: "rgba(247, 246, 239, 0.92)",
-    backdropFilter: "blur(2px)",
-    fontSize: "20px",
-    lineHeight: 1,
-    cursor: "pointer",
-    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.15)"
-  } as const;
-
   const movePlayer = (direction: Direction) => {
     setGame((current) => {
       if (current.status !== "playing") return current;
@@ -636,10 +622,11 @@ const EmojiMazeApp = () => {
       <SlapInlineText>Points: {game.points} | Coins left: {game.coins.size}</SlapInlineText>
       <details>
         <summary>Instructions</summary>
-        <SlapInlineText>Use arrow keys or WASD. Turn-based: monsters move after you move.</SlapInlineText>
+        <SlapInlineText>Use arrow keys, WASD, or the D-pad. Turn-based: monsters move after you move.</SlapInlineText>
         <SlapInlineText>You can walk through trees and push rocks. Monsters cannot pass either.</SlapInlineText>
         <SlapInlineText>Monsters chase when they have direct line of sight.</SlapInlineText>
         <SlapInlineText>Each level starts at 100 points. Every move costs 1 point, each coin gives +5.</SlapInlineText>
+        <SlapInlineText>A = retry level, B = restart run.</SlapInlineText>
       </details>
       <SlapInlineText>Key: {game.hasKey ? "Collected" : "Missing"}</SlapInlineText>
       <SlapInlineText>{statusText}</SlapInlineText>
@@ -664,60 +651,24 @@ const EmojiMazeApp = () => {
             fontSize: "1.1rem",
             fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif',
             userSelect: "none",
-            overflowX: "auto",
-            paddingBottom: "132px"
+            overflowX: "auto"
           }}
         >
           {board}
         </pre>
-
-        <div
-          style={{
-            position: "absolute",
-            left: "50%",
-            bottom: "12px",
-            transform: "translateX(-50%)",
-            display: "grid",
-            gridTemplateColumns: `repeat(3, ${CONTROL_SIZE}px)`,
-            gridTemplateRows: `repeat(3, ${CONTROL_SIZE}px)`,
-            gap: "6px",
-            pointerEvents: "none"
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => movePlayer("up")}
-            disabled={game.status !== "playing"}
-            style={{ ...controlButtonStyle, gridColumn: 2, gridRow: 1, pointerEvents: "auto" }}
-          >
-            ⬆️
-          </button>
-          <button
-            type="button"
-            onClick={() => movePlayer("left")}
-            disabled={game.status !== "playing"}
-            style={{ ...controlButtonStyle, gridColumn: 1, gridRow: 2, pointerEvents: "auto" }}
-          >
-            ⬅️
-          </button>
-          <button
-            type="button"
-            onClick={() => movePlayer("down")}
-            disabled={game.status !== "playing"}
-            style={{ ...controlButtonStyle, gridColumn: 2, gridRow: 2, pointerEvents: "auto" }}
-          >
-            ⬇️
-          </button>
-          <button
-            type="button"
-            onClick={() => movePlayer("right")}
-            disabled={game.status !== "playing"}
-            style={{ ...controlButtonStyle, gridColumn: 3, gridRow: 2, pointerEvents: "auto" }}
-          >
-            ➡️
-          </button>
-        </div>
       </div>
+
+      <SlapGamepad
+        onUp={() => movePlayer("up")}
+        onDown={() => movePlayer("down")}
+        onLeft={() => movePlayer("left")}
+        onRight={() => movePlayer("right")}
+        onA={() => setGame(createGame(game.level))}
+        onB={() => setGame(createGame(1))}
+        dpadDisabled={game.status !== "playing"}
+        aTitle="Retry level"
+        bTitle="Restart run"
+      />
 
       <div className="slap-button-row">
         <SlapActionButton title="Restart Run" onClick={() => setGame(createGame(1))} />

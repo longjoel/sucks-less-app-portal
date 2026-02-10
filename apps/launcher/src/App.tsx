@@ -175,7 +175,7 @@ const rawAppCatalog: AppCatalogItem[] = [
     author: "Joel",
     description: "Swipe and merge tiles to reach 2048.",
     tags: ["game", "puzzle", "numbers"],
-    version: "1.0.0",
+    version: "1.0.1",
     icon: "🔢",
     loadManifest: async () => (await import("@slap/game-2048")).game2048Manifest
   },

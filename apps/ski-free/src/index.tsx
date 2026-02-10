@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import type { SlapApplicationContext, SlapApplicationManifest } from "@slap/sdk";
-import { SlapActionButton, SlapInlineText } from "@slap/ui";
+import { SlapActionButton, SlapInlineText, SlapGamepad } from "@slap/ui";
 
 type Obstacle = {
   id: number;
@@ -8,7 +8,7 @@ type Obstacle = {
   row: number;
 };
 
-type GameStatus = "idle" | "playing" | "lost";
+type GameStatus = "idle" | "playing" | "paused" | "lost";
 
 type GameState = {
   status: GameStatus;
@@ -160,6 +160,20 @@ const SkiFreeApp = ({ ctx }: { ctx: SlapApplicationContext }) => {
     );
   };
 
+  const togglePause = () => {
+    setState((current) => {
+      if (current.status === "playing") {
+        setStatusText("Paused.");
+        return { ...current, status: "paused" };
+      }
+      if (current.status === "paused") {
+        setStatusText("Back on the slopes.");
+        return { ...current, status: "playing" };
+      }
+      return current;
+    });
+  };
+
   const onCanvasPointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
     if (state.status !== "playing") return;
 
@@ -216,6 +230,7 @@ const SkiFreeApp = ({ ctx }: { ctx: SlapApplicationContext }) => {
     <section className="slap-shell">
       <div className="skifree-layout">
         <SlapInlineText>Use Left and Right to dodge trees.</SlapInlineText>
+        <SlapInlineText>Gamepad: D-pad moves left/right. A = start/restart, B = pause/resume.</SlapInlineText>
 
         <div className="skifree-stage">
           <canvas
@@ -235,8 +250,22 @@ const SkiFreeApp = ({ ctx }: { ctx: SlapApplicationContext }) => {
         </div>
       </div>
 
+      <SlapGamepad
+        onLeft={moveLeft}
+        onRight={moveRight}
+        onA={startOrRestart}
+        onB={togglePause}
+        dpadDisabled={state.status !== "playing"}
+        bDisabled={state.status === "idle" || state.status === "lost"}
+        aTitle="Start or restart"
+        bTitle="Pause or resume"
+      />
+
       <div className="skifree-controls">
-        <SlapActionButton title={state.status === "playing" ? "Restart" : "Start"} onClick={startOrRestart} />
+        <SlapActionButton
+          title={state.status === "playing" || state.status === "paused" ? "Restart" : "Start"}
+          onClick={startOrRestart}
+        />
       </div>
     </section>
   );

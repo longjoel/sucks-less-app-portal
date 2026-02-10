@@ -1,12 +1,21 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent, type TouchEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent, type TouchEvent } from "react";
 import type { SlapApplicationContext, SlapApplicationManifest } from "@slap/sdk";
-import { SlapActionButton, SlapApplicationShell, SlapInlineText } from "@slap/ui";
+import { SlapActionButton, SlapApplicationShell, SlapInlineText, SlapGamepad } from "@slap/ui";
 
 type Direction = "left" | "right" | "up" | "down";
 type Board = number[][];
 
+type Tile = {
+  id: number;
+  value: number;
+  row: number;
+  col: number;
+  isNew?: boolean;
+  merged?: boolean;
+};
+
 type GameState = {
-  board: Board;
+  tiles: Tile[];
   score: number;
   bestScore: number;
 };
@@ -23,83 +32,139 @@ const Preview = (_props: Record<string, never>) => (
 
 const emptyBoard = (): Board => Array.from({ length: SIZE }, () => Array.from({ length: SIZE }, () => 0));
 
-const cloneBoard = (board: Board): Board => board.map((row) => [...row]);
+const boardFromTiles = (tiles: Tile[]): Board => {
+  const board = emptyBoard();
+  for (const tile of tiles) {
+    board[tile.row][tile.col] = tile.value;
+  }
+  return board;
+};
 
-const addRandomTile = (board: Board): Board => {
-  const next = cloneBoard(board);
+const randomTileValue = () => (Math.random() < 0.9 ? 2 : 4);
+
+const addRandomTile = (tiles: Tile[], getId: () => number): Tile[] => {
+  const board = boardFromTiles(tiles);
   const emptyCells: Array<{ row: number; col: number }> = [];
 
   for (let row = 0; row < SIZE; row += 1) {
     for (let col = 0; col < SIZE; col += 1) {
-      if (next[row][col] === 0) emptyCells.push({ row, col });
+      if (board[row][col] === 0) emptyCells.push({ row, col });
     }
   }
 
-  if (emptyCells.length === 0) return next;
+  if (emptyCells.length === 0) return tiles;
 
   const picked = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-  next[picked.row][picked.col] = Math.random() < 0.9 ? 2 : 4;
-  return next;
+  const nextTile: Tile = {
+    id: getId(),
+    value: randomTileValue(),
+    row: picked.row,
+    col: picked.col,
+    isNew: true
+  };
+  return [...tiles, nextTile];
 };
 
-const newGame = (): GameState => {
-  let board = emptyBoard();
-  board = addRandomTile(board);
-  board = addRandomTile(board);
-  return { board, score: 0, bestScore: 0 };
-};
-
-const compressLine = (line: number[]) => {
-  const filtered = line.filter((value) => value !== 0);
-  const merged: number[] = [];
-  let gained = 0;
-
-  for (let index = 0; index < filtered.length; index += 1) {
-    if (filtered[index] !== 0 && filtered[index] === filtered[index + 1]) {
-      const value = filtered[index] * 2;
-      merged.push(value);
-      gained += value;
-      index += 1;
-    } else {
-      merged.push(filtered[index]);
+const tilesFromBoard = (board: Board, getId: () => number): Tile[] => {
+  const tiles: Tile[] = [];
+  for (let row = 0; row < SIZE; row += 1) {
+    for (let col = 0; col < SIZE; col += 1) {
+      const value = board[row][col];
+      if (value === 0) continue;
+      tiles.push({ id: getId(), value, row, col });
     }
   }
-
-  while (merged.length < SIZE) merged.push(0);
-
-  return { merged, gained };
+  return tiles;
 };
 
-const boardsEqual = (a: Board, b: Board) =>
-  a.every((row, rowIndex) => row.every((value, colIndex) => value === b[rowIndex][colIndex]));
+const newGame = (getId: () => number): GameState => {
+  let tiles: Tile[] = [];
+  tiles = addRandomTile(tiles, getId);
+  tiles = addRandomTile(tiles, getId);
+  return { tiles, score: 0, bestScore: 0 };
+};
 
-const applyMove = (board: Board, direction: Direction) => {
-  const next = emptyBoard();
+const moveTiles = (tiles: Tile[], direction: Direction) => {
+  const grid: Array<Array<Tile | null>> = Array.from({ length: SIZE }, () => Array.from({ length: SIZE }, () => null));
+  for (const tile of tiles) {
+    grid[tile.row][tile.col] = tile;
+  }
+
+  const nextTiles: Tile[] = [];
   let gained = 0;
+  let moved = false;
+
+  const placeTile = (tile: Tile, row: number, col: number, merged: boolean) => {
+    if (tile.row !== row || tile.col !== col || merged) {
+      moved = true;
+    }
+    nextTiles.push({
+      ...tile,
+      row,
+      col,
+      merged
+    });
+  };
 
   if (direction === "left" || direction === "right") {
     for (let row = 0; row < SIZE; row += 1) {
-      const line = [...board[row]];
-      const source = direction === "right" ? line.reverse() : line;
-      const { merged, gained: lineGained } = compressLine(source);
-      const finalLine = direction === "right" ? [...merged].reverse() : merged;
-      next[row] = finalLine;
-      gained += lineGained;
+      const line: Tile[] = [];
+      for (let col = 0; col < SIZE; col += 1) {
+        const tile = grid[row][col];
+        if (tile) line.push(tile);
+      }
+      if (direction === "right") line.reverse();
+
+      let targetIndex = 0;
+      for (let index = 0; index < line.length; index += 1) {
+        const current = line[index];
+        const next = line[index + 1];
+        const targetCol = direction === "left" ? targetIndex : SIZE - 1 - targetIndex;
+
+        if (next && next.value === current.value) {
+          const mergedValue = current.value * 2;
+          gained += mergedValue;
+          placeTile({ ...current, value: mergedValue }, row, targetCol, true);
+          index += 1;
+          targetIndex += 1;
+          continue;
+        }
+
+        placeTile(current, row, targetCol, false);
+        targetIndex += 1;
+      }
     }
   } else {
     for (let col = 0; col < SIZE; col += 1) {
-      const line = board.map((row) => row[col]);
-      const source = direction === "down" ? [...line].reverse() : line;
-      const { merged, gained: lineGained } = compressLine(source);
-      const finalLine = direction === "down" ? [...merged].reverse() : merged;
+      const line: Tile[] = [];
       for (let row = 0; row < SIZE; row += 1) {
-        next[row][col] = finalLine[row];
+        const tile = grid[row][col];
+        if (tile) line.push(tile);
       }
-      gained += lineGained;
+      if (direction === "down") line.reverse();
+
+      let targetIndex = 0;
+      for (let index = 0; index < line.length; index += 1) {
+        const current = line[index];
+        const next = line[index + 1];
+        const targetRow = direction === "up" ? targetIndex : SIZE - 1 - targetIndex;
+
+        if (next && next.value === current.value) {
+          const mergedValue = current.value * 2;
+          gained += mergedValue;
+          placeTile({ ...current, value: mergedValue }, targetRow, col, true);
+          index += 1;
+          targetIndex += 1;
+          continue;
+        }
+
+        placeTile(current, targetRow, col, false);
+        targetIndex += 1;
+      }
     }
   }
 
-  return { nextBoard: next, gained, moved: !boardsEqual(board, next) };
+  return { nextTiles, gained, moved };
 };
 
 const hasMovesLeft = (board: Board) => {
@@ -122,9 +187,14 @@ const tileClass = (value: number) => {
 };
 
 const Game2048App = ({ ctx }: { ctx: SlapApplicationContext }) => {
-  const [state, setState] = useState<GameState>(newGame);
+  const tileIdRef = useRef(1);
+  const getNextId = useCallback(() => tileIdRef.current++, []);
+  const [state, setState] = useState<GameState>(() => newGame(getNextId));
   const [status, setStatus] = useState("Swipe to play.");
+  const [shake, setShake] = useState(false);
+  const [canUndo, setCanUndo] = useState(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const undoRef = useRef<{ tiles: Tile[]; score: number } | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -132,7 +202,7 @@ const Game2048App = ({ ctx }: { ctx: SlapApplicationContext }) => {
       if (!raw) return;
 
       try {
-        const parsed = JSON.parse(raw) as Partial<GameState>;
+        const parsed = JSON.parse(raw) as Partial<{ board: Board; score: number; bestScore: number }>;
         if (!Array.isArray(parsed.board) || typeof parsed.score !== "number" || typeof parsed.bestScore !== "number") {
           return;
         }
@@ -142,26 +212,44 @@ const Game2048App = ({ ctx }: { ctx: SlapApplicationContext }) => {
         );
 
         if (validBoard) {
-          setState({ board: parsed.board as Board, score: parsed.score, bestScore: parsed.bestScore });
+          setState({ tiles: tilesFromBoard(parsed.board as Board, getNextId), score: parsed.score, bestScore: parsed.bestScore });
         }
       } catch {
         setStatus("Saved game data was invalid. Starting fresh.");
       }
     })();
-  }, [ctx.vfs]);
+  }, [ctx.vfs, getNextId]);
 
   useEffect(() => {
-    void ctx.vfs.writeText(STORAGE_PATH, JSON.stringify(state, null, 2));
+    const board = boardFromTiles(state.tiles);
+    void ctx.vfs.writeText(STORAGE_PATH, JSON.stringify({ board, score: state.score, bestScore: state.bestScore }, null, 2));
   }, [ctx.vfs, state]);
+
+  useEffect(() => {
+    if (!shake) return;
+    const timer = window.setTimeout(() => setShake(false), 180);
+    return () => window.clearTimeout(timer);
+  }, [shake]);
 
   const move = (direction: Direction) => {
     setState((current) => {
-      const { nextBoard, gained, moved } = applyMove(current.board, direction);
-      if (!moved) return current;
+      const cleanedTiles = current.tiles.map((tile) => ({ ...tile, isNew: false, merged: false }));
+      const { nextTiles, gained, moved } = moveTiles(cleanedTiles, direction);
+      if (!moved) {
+        setShake(true);
+        return current;
+      }
 
-      const boardAfterSpawn = addRandomTile(nextBoard);
+      undoRef.current = {
+        tiles: cleanedTiles.map((tile) => ({ ...tile })),
+        score: current.score
+      };
+      setCanUndo(true);
+
+      const tilesWithSpawn = addRandomTile(nextTiles, getNextId);
       const score = current.score + gained;
       const bestScore = Math.max(current.bestScore, score);
+      const boardAfterSpawn = boardFromTiles(tilesWithSpawn);
 
       if (boardAfterSpawn.some((row) => row.some((value) => value === 2048))) {
         setStatus("You reached 2048!");
@@ -172,7 +260,7 @@ const Game2048App = ({ ctx }: { ctx: SlapApplicationContext }) => {
       }
 
       return {
-        board: boardAfterSpawn,
+        tiles: tilesWithSpawn,
         score,
         bestScore
       };
@@ -236,12 +324,28 @@ const Game2048App = ({ ctx }: { ctx: SlapApplicationContext }) => {
 
   const restart = () => {
     const bestScore = state.bestScore;
-    const fresh = newGame();
+    const fresh = newGame(getNextId);
     setState({ ...fresh, bestScore });
     setStatus("New game started.");
+    undoRef.current = null;
+    setCanUndo(false);
   };
 
-  const gameOver = useMemo(() => !hasMovesLeft(state.board), [state.board]);
+  const undo = () => {
+    const previous = undoRef.current;
+    if (!previous) return;
+    setState((current) => ({
+      tiles: previous.tiles.map((tile) => ({ ...tile, isNew: false, merged: false })),
+      score: previous.score,
+      bestScore: current.bestScore
+    }));
+    setStatus("Undid last move.");
+    undoRef.current = null;
+    setCanUndo(false);
+  };
+
+  const board = useMemo(() => boardFromTiles(state.tiles), [state.tiles]);
+  const gameOver = useMemo(() => !hasMovesLeft(board), [board]);
 
   return (
     <SlapApplicationShell title="2048">
@@ -249,16 +353,60 @@ const Game2048App = ({ ctx }: { ctx: SlapApplicationContext }) => {
       <SlapInlineText>Score: {state.score} | Best: {state.bestScore}</SlapInlineText>
       <SlapInlineText>{status}</SlapInlineText>
 
-      <SlapInlineText>Tap board edges or swipe to move.</SlapInlineText>
+      <SlapInlineText>Use arrow keys, swipe, tap board edges, or the D-pad.</SlapInlineText>
 
-      <div className="game2048-grid" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onClick={onBoardClick}>
-        {state.board.flatMap((row, rowIndex) =>
-          row.map((value, colIndex) => (
-            <div key={`${rowIndex}-${colIndex}`} className={`game2048-tile ${tileClass(value)}`}>
-              {value === 0 ? "" : value}
-            </div>
-          ))
-        )}
+      <div className="game2048-wrap">
+        <SlapInlineText>Gamepad: D-pad moves. A = new game, B = undo.</SlapInlineText>
+
+        <div
+          className={`game2048-board${shake ? " is-shake" : ""}`}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          onClick={onBoardClick}
+          aria-label="2048 board"
+        >
+          <div className="game2048-grid" aria-hidden="true">
+            {Array.from({ length: SIZE * SIZE }, (_, index) => (
+              <div key={`cell-${index}`} className="game2048-cell" />
+            ))}
+          </div>
+          <div className="game2048-tiles">
+            {state.tiles.map((tile) => (
+              <div
+                key={tile.id}
+                className={[
+                  "game2048-tile",
+                  tileClass(tile.value),
+                  tile.isNew ? "is-new" : "",
+                  tile.merged ? "is-merged" : ""
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                style={{
+                  top: `calc((var(--tile-size) + var(--tile-gap)) * ${tile.row})`,
+                  left: `calc((var(--tile-size) + var(--tile-gap)) * ${tile.col})`
+                }}
+              >
+                {tile.value}
+              </div>
+            ))}
+          </div>
+        </div>
+
+
+        <SlapGamepad
+          onUp={() => move("up")}
+          onDown={() => move("down")}
+          onLeft={() => move("left")}
+          onRight={() => move("right")}
+          onA={restart}
+          onB={undo}
+          dpadDisabled={gameOver}
+          bDisabled={!canUndo}
+          aTitle="New game"
+          bTitle="Undo move"
+        />
+        
       </div>
 
       <div className="slap-button-row">
