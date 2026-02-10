@@ -144,6 +144,14 @@ export const apps = [
     description: "Roll custom color-coded dice pools for tabletop sessions."
   },
   {
+    id: "dnd-character-sheet",
+    entry: "../../dnd-character-sheet/src/index.tsx",
+    exportName: "dndCharacterSheetManifest",
+    title: "D&D Character Sheet",
+    shortName: "D&D Sheet",
+    description: "Manage multiple D&D character sheets across campaigns."
+  },
+  {
     id: "compass",
     entry: "../../compass/src/index.tsx",
     exportName: "compassManifest",

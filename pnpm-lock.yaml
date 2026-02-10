@@ -168,6 +168,22 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
+  apps/dnd-character-sheet:
+    dependencies:
+      '@slap/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
+      '@slap/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   apps/emoji-comic-maker:
     dependencies:
       '@slap/sdk':
@@ -268,6 +284,9 @@ importers:
       '@slap/daily-checklist':
         specifier: workspace:*
         version: link:../daily-checklist
+      '@slap/dnd-character-sheet':
+        specifier: workspace:*
+        version: link:../dnd-character-sheet
       '@slap/emoji-comic-maker':
         specifier: workspace:*
         version: link:../emoji-comic-maker

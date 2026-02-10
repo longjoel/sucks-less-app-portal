@@ -330,6 +330,16 @@ const rawAppCatalog: AppCatalogItem[] = [
     loadManifest: async () => (await import("@slap/dice-roller")).diceRollerManifest
   },
   {
+    id: "dnd-character-sheet",
+    title: "D&D Character Sheet",
+    author: "Joel",
+    description: "Manage multiple D&D character sheets across campaigns.",
+    tags: ["tabletop", "roleplay", "utility"],
+    version: "1.0.0",
+    icon: "🧙",
+    loadManifest: async () => (await import("@slap/dnd-character-sheet")).dndCharacterSheetManifest
+  },
+  {
     id: "compass",
     title: "Compass",
     author: "Joel",
@@ -618,6 +628,7 @@ export const App = () => {
   const [manageExpandedId, setManageExpandedId] = useState<string | null>(null);
   const [cleanupMode, setCleanupMode] = useState(false);
   const [isStandalone, setIsStandalone] = useState(isStandaloneDisplayMode);
+  const [openGroupKeys, setOpenGroupKeys] = useState<Set<string>>(new Set());
   const [launcherError, setLauncherError] = useState<string | null>(null);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
   const [isSyncingApps, setIsSyncingApps] = useState(false);
@@ -692,6 +703,22 @@ export const App = () => {
     sorted.sort((a, b) => a.label.localeCompare(b.label));
     return sorted;
   }, [homeActiveList]);
+
+  useEffect(() => {
+    if (homeTab !== "all") {
+      setOpenGroupKeys(new Set());
+      return;
+    }
+
+    setOpenGroupKeys((current) => {
+      const available = new Set(groupedHomeApps.map((group) => group.key));
+      const next = new Set([...current].filter((key) => available.has(key)));
+      if (next.size === 0 && groupedHomeApps[0]) {
+        next.add(groupedHomeApps[0].key);
+      }
+      return next;
+    });
+  }, [homeTab, groupedHomeApps]);
 
   const availableAppCatalog = useMemo(
     () => appCatalog.filter((app) => !installedApps[app.id]),
@@ -1256,8 +1283,24 @@ export const App = () => {
         ) : null}
         {homeTab === "all" ? (
           <div className="app-groups">
-            {groupedHomeApps.map((group, index) => (
-              <details key={group.key} className="app-group" defaultOpen={index === 0}>
+            {groupedHomeApps.map((group) => (
+              <details
+                key={group.key}
+                className="app-group"
+                open={openGroupKeys.has(group.key)}
+                onToggle={(event) => {
+                  const details = event.currentTarget as HTMLDetailsElement;
+                  setOpenGroupKeys((current) => {
+                    const next = new Set(current);
+                    if (details.open) {
+                      next.add(group.key);
+                    } else {
+                      next.delete(group.key);
+                    }
+                    return next;
+                  });
+                }}
+              >
                 <summary className="app-group-summary">
                   <span>{group.label}</span>
                   <span className="app-group-count">{group.entries.length}</span>
