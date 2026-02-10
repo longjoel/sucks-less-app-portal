@@ -19,6 +19,8 @@ export default defineConfig(({ command }) => {
         "@slap/mh-gad7": new URL("../mh-gad7/src/index.tsx", import.meta.url).pathname,
         "@slap/mh-abc": new URL("../mh-abc/src/index.tsx", import.meta.url).pathname,
         "@slap/box-breathing": new URL("../box-breathing/src/index.tsx", import.meta.url).pathname,
+        "@slap/audio-recorder": new URL("../audio-recorder/src/index.tsx", import.meta.url).pathname,
+        "@slap/calendar": new URL("../calendar/src/index.tsx", import.meta.url).pathname,
         "@slap/daily-checklist": new URL("../daily-checklist/src/index.tsx", import.meta.url).pathname,
         "@slap/game-2048": new URL("../game-2048/src/index.tsx", import.meta.url).pathname,
         "@slap/minesweeper": new URL("../minesweeper/src/index.tsx", import.meta.url).pathname,

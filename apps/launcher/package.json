@@ -10,7 +10,9 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@slap/audio-recorder": "workspace:*",
     "@slap/box-breathing": "workspace:*",
+    "@slap/calendar": "workspace:*",
     "@slap/calculator": "workspace:*",
     "@slap/daily-checklist": "workspace:*",
     "@slap/game-2048": "workspace:*",

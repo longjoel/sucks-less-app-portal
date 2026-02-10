@@ -56,6 +56,14 @@ export const apps = [
     description: "Check off daily tasks and edit your reusable list."
   },
   {
+    id: "audio-recorder",
+    entry: "../../audio-recorder/src/index.tsx",
+    exportName: "audioRecorderManifest",
+    title: "Audio Recorder",
+    shortName: "Audio",
+    description: "Record audio, play back takes, and monitor room loudness."
+  },
+  {
     id: "game-2048",
     entry: "../../game-2048/src/index.tsx",
     exportName: "game2048Manifest",
@@ -110,6 +118,14 @@ export const apps = [
     title: "Compass",
     shortName: "Compass",
     description: "Basic heading compass using device orientation sensors."
+  },
+  {
+    id: "calendar",
+    entry: "../../calendar/src/index.tsx",
+    exportName: "calendarManifest",
+    title: "Calendar",
+    shortName: "Calendar",
+    description: "Date, time, moon phase, and daylight remaining with optional location."
   },
   {
     id: "countdown",

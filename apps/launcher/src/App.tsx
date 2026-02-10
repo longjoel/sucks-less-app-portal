@@ -129,6 +129,16 @@ const rawAppCatalog: AppCatalogItem[] = [
     loadManifest: async () => (await import("@slap/daily-checklist")).dailyChecklistManifest
   },
   {
+    id: "audio-recorder",
+    title: "Audio Recorder",
+    author: "Joel",
+    description: "Record audio, play back takes, and monitor room loudness.",
+    tags: ["audio", "utility", "recording"],
+    version: "1.0.0",
+    icon: "🎙️",
+    loadManifest: async () => (await import("@slap/audio-recorder")).audioRecorderManifest
+  },
+  {
     id: "game-2048",
     title: "2048",
     author: "Joel",
@@ -267,6 +277,16 @@ const rawAppCatalog: AppCatalogItem[] = [
     version: "1.0.0",
     icon: "🧭",
     loadManifest: async () => (await import("@slap/compass")).compassManifest
+  },
+  {
+    id: "calendar",
+    title: "Calendar",
+    author: "Joel",
+    description: "Date, time, moon phase, and daylight remaining with optional location.",
+    tags: ["utility", "time", "astronomy"],
+    version: "1.0.0",
+    icon: "📅",
+    loadManifest: async () => (await import("@slap/calendar")).calendarManifest
   },
   {
     id: "countdown",
