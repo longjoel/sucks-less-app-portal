@@ -30,6 +30,7 @@
     "@slap/sudoku": "workspace:*",
     "@slap/fireplace": "workspace:*",
     "@slap/aquarium": "workspace:*",
+    "@slap/ar-garden": "workspace:*",
     "@slap/zen-garden": "workspace:*",
     "@slap/whiteboard": "workspace:*",
     "@slap/notes": "workspace:*",

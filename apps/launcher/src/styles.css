@@ -1255,6 +1255,83 @@ body {
   touch-action: none;
 }
 
+.ar-garden-stage {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  border-radius: 1.2rem;
+  overflow: hidden;
+  border: 1px solid #1f3525;
+  background: radial-gradient(circle at 30% 20%, #cfe7d4 0%, #7ea388 45%, #284535 100%);
+  aspect-ratio: 3 / 4;
+  min-height: 360px;
+  box-shadow: inset 0 0 40px rgba(15, 35, 22, 0.35);
+}
+
+.ar-garden-stage.is-live {
+  border-color: #3a5c45;
+}
+
+.ar-garden-video,
+.ar-garden-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ar-garden-video {
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.ar-garden-stage.is-live .ar-garden-video {
+  opacity: 1;
+}
+
+.ar-garden-canvas {
+  touch-action: none;
+}
+
+.ar-garden-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  color: #f9f6ed;
+  background: rgba(8, 16, 12, 0.35);
+  text-align: center;
+  font-size: 0.95rem;
+  padding: 1rem;
+}
+
+.ar-garden-controls {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0.8rem 0 0.6rem;
+}
+
+.ar-garden-control {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.ar-garden-control input[type="range"] {
+  width: 100%;
+}
+
+.ar-garden-status,
+.ar-garden-hint {
+  color: var(--muted);
+}
+
 .zen-garden-stage {
   width: 100%;
   max-width: 420px;

@@ -224,6 +224,14 @@ export const apps = [
     description: "Relaxing fish tank you can feed and poke."
   },
   {
+    id: "ar-garden",
+    entry: "../../ar-garden/src/index.tsx",
+    exportName: "arGardenManifest",
+    title: "AR Garden",
+    shortName: "Garden",
+    description: "Peaceful augmented garden with gentle music and look-around motion."
+  },
+  {
     id: "zen-garden",
     entry: "../../zen-garden/src/index.tsx",
     exportName: "zenGardenManifest",

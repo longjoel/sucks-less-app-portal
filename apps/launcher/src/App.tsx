@@ -260,6 +260,16 @@ const rawAppCatalog: AppCatalogItem[] = [
     loadManifest: async () => (await import("@slap/aquarium")).aquariumManifest
   },
   {
+    id: "ar-garden",
+    title: "AR Garden",
+    author: "Joel",
+    description: "Peaceful augmented garden with gentle music and look-around motion.",
+    tags: ["ambient", "relax", "ar"],
+    version: "1.0.0",
+    icon: "🪴",
+    loadManifest: async () => (await import("@slap/ar-garden")).arGardenManifest
+  },
+  {
     id: "zen-garden",
     title: "Zen Garden",
     author: "Joel",

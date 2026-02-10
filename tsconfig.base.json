@@ -28,6 +28,7 @@
       "@slap/sudoku": ["apps/sudoku/src/index.tsx"],
       "@slap/fireplace": ["apps/fireplace/src/index.tsx"],
       "@slap/aquarium": ["apps/aquarium/src/index.tsx"],
+      "@slap/ar-garden": ["apps/ar-garden/src/index.tsx"],
       "@slap/zen-garden": ["apps/zen-garden/src/index.tsx"],
       "@slap/whiteboard": ["apps/whiteboard/src/index.tsx"],
       "@slap/notes": ["apps/notes/src/index.tsx"]
